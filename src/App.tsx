@@ -1,56 +1,53 @@
-import { useState } from 'react';
-import { blocksGame } from './games/blocks';
-import { DIFFICULTIES, DIFFICULTY_LABEL } from './lib/difficulty';
-import type { Difficulty } from './lib/difficulty';
-import { deriveSeed } from './lib/random';
-import { PLAYER_COLORS } from './shell/ui/colors';
-import { PlayLayout } from './shell/ui/PlayLayout';
+import { useMemo, useState } from 'react';
+import type { GameModule } from './games/types';
+import { randomSeed } from './lib/random';
+import { unlockAudio } from './lib/sound';
+import { browserStore } from './lib/storage';
+import type { MatchConfig } from './shell/logic/match';
+import { loadSetup, saveSetup } from './shell/logic/persistence';
+import { defaultSetup, toMatchConfig } from './shell/logic/setup';
+import type { SavedSetup } from './shell/logic/setup';
+import { GameMenu } from './shell/ui/GameMenu';
+import { Match } from './shell/ui/Match';
+import { PlayerSetup } from './shell/ui/PlayerSetup';
 
-const noop = () => {};
-const { PlayerArea } = blocksGame;
+type Screen =
+  | { kind: 'menu' }
+  | { kind: 'setup'; game: GameModule }
+  | { kind: 'match'; game: GameModule; config: MatchConfig; seed: number };
 
-/** 임시 터치 시험 화면 — 셸(메뉴·설정·대결)이 생기면 교체한다 */
 export default function App() {
-  const [players, setPlayers] = useState(2);
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  const [round, setRound] = useState(1);
+  const store = useMemo(() => browserStore(), []);
+  const [screen, setScreen] = useState<Screen>({ kind: 'menu' });
+
+  const startMatch = (game: GameModule, setup: SavedSetup) => {
+    saveSetup(store, setup);
+    setScreen({ kind: 'match', game, config: toMatchConfig(game.id, setup), seed: randomSeed() });
+  };
 
   return (
-    <div className="app touch-test">
-      <div className="touch-test-bar">
-        <h1>우리집 보드게임 · 터치 시험</h1>
-        {[1, 2, 3, 4].map((n) => (
-          <button key={n} type="button" className="btn" aria-pressed={players === n} onClick={() => setPlayers(n)}>
-            {n}명
-          </button>
-        ))}
-        {DIFFICULTIES.map((d) => (
-          <button key={d} type="button" className="btn" aria-pressed={difficulty === d} onClick={() => setDifficulty(d)}>
-            {DIFFICULTY_LABEL[d]}
-          </button>
-        ))}
-        <button type="button" className="btn" onClick={() => setRound((r) => r + 1)}>
-          새 문제
-        </button>
-      </div>
-      <div className="touch-test-play">
-        <PlayLayout
-          columns={Array.from({ length: players }, (_, i) => ({
-            key: String(i),
-            color: PLAYER_COLORS[i],
-            header: <strong>{i + 1}번</strong>,
-            body: (
-              <PlayerArea
-                key={round + '-' + difficulty}
-                difficulty={difficulty}
-                seed={deriveSeed(round, i)}
-                active
-                onSolved={noop}
-              />
-            ),
-          }))}
+    // 첫 터치 때 소리를 깨우고, 길게 누르기 메뉴는 막는다
+    <div className="app" onPointerDownCapture={unlockAudio} onContextMenu={(e) => e.preventDefault()}>
+      {screen.kind === 'menu' && <GameMenu onSelect={(game) => setScreen({ kind: 'setup', game })} />}
+      {screen.kind === 'setup' && (
+        <PlayerSetup
+          game={screen.game}
+          initial={loadSetup(store) ?? defaultSetup()}
+          onBack={() => setScreen({ kind: 'menu' })}
+          onStart={(setup) => startMatch(screen.game, setup)}
         />
-      </div>
+      )}
+      {screen.kind === 'match' && (
+        <Match
+          key={screen.seed}
+          game={screen.game}
+          config={screen.config}
+          seed={screen.seed}
+          store={store}
+          onExit={() => setScreen({ kind: 'menu' })}
+          onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
+        />
+      )}
     </div>
   );
 }

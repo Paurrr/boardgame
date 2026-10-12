@@ -1,0 +1,112 @@
+.match {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.topBar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0.5rem 1rem 0 1rem;
+  border-bottom: 4px solid var(--ink);
+  background: var(--bg);
+}
+
+.round {
+  margin: 0 1.5rem 0.5rem 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.clock {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.clockUrgent {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  color: var(--warn);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.play {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 8rem;
+  font-weight: bold;
+}
+
+.nameLine {
+  display: flex;
+  align-items: baseline;
+}
+
+.name {
+  margin-right: 0.6rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.difficulty {
+  color: var(--ink-soft);
+}
+
+.score {
+  margin-top: 0.3rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.gain {
+  color: var(--ok);
+}
+
+.status {
+  margin-top: 0.3rem;
+  font-size: 1.2rem;
+}
+
+.record {
+  margin-top: 0.3rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--warn);
+}
+
+/* 라운드가 끝나면 아래 가운데에 (아이 손이 닿는 곳) */
+.resultBar {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem 0.3rem 1.4rem;
+  border: 4px solid var(--ink);
+  border-radius: 18px;
+  background: var(--panel);
+  transform: translateX(-50%);
+}
+
+.resultText {
+  margin: 0 1.2rem 0.5rem 0;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
