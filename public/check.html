@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>기기 확인 - 우리집 보드게임</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: #fff7ec; color: #2b2118; font-family: sans-serif; font-size: 22px; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+  #info { position: absolute; top: 0; left: 0; width: 46%; height: 100%; overflow: auto; padding: 16px; box-sizing: border-box; touch-action: pan-y; }
+  #pad { position: absolute; top: 0; right: 0; width: 54%; height: 100%; background: #ffffff; border-left: 4px solid #2b2118; overflow: hidden; }
+  h1 { margin: 0 0 12px 0; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #d9ccb8; vertical-align: top; word-break: break-all; }
+  th { width: 38%; color: #6b5b4b; font-weight: normal; }
+  .yes { color: #27ae60; font-weight: bold; }
+  .no { color: #e5483b; font-weight: bold; }
+  #count { position: absolute; top: 16px; left: 16px; font-size: 40px; font-weight: bold; pointer-events: none; }
+  .dot { position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 45px; opacity: 0.8; pointer-events: none; }
+  button { font-size: 22px; padding: 12px 20px; margin: 12px 8px 0 0; border: 3px solid #2b2118; background: #ffffff; border-radius: 12px; }
+  textarea { width: 100%; height: 160px; font-size: 16px; margin-top: 8px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="info">
+  <h1>기기 확인</h1>
+  <table id="rows"></table>
+  <button id="fs" type="button">전체화면 시험</button>
+  <button id="home" type="button">게임으로</button>
+  <p>아래 내용을 그대로 알려주세요.</p>
+  <textarea id="report" readonly></textarea>
+</div>
+<div id="pad"><div id="count">손가락을 여러 개 대 보세요</div></div>
+<script>
+(function () {
+  'use strict';
+  var nav = window.navigator;
+  var ua = nav.userAgent;
+  var root = document.documentElement;
+  var maxSeen = 0;
+
+  function find(re) {
+    var m = ua.match(re);
+    return m ? m[1] : '알 수 없음';
+  }
+
+  function yesNo(v) {
+    return v ? '있음' : '없음';
+  }
+
+  function storageWorks() {
+    try {
+      window.localStorage.setItem('__check', '1');
+      window.localStorage.removeItem('__check');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function collect() {
+    return [
+      ['브라우저', ua],
+      ['Chrome 버전', find(/Chrome\/([\d.]+)/)],
+      ['Android 버전', find(/Android ([\d.]+)/)],
+      ['WebView 여부', /; wv\)/.test(ua) ? '예' : '아니오'],
+      ['화면 크기(screen)', screen.width + ' x ' + screen.height],
+      ['보이는 크기(viewport)', window.innerWidth + ' x ' + window.innerHeight],
+      ['devicePixelRatio', String(window.devicePixelRatio || 1)],
+      ['maxTouchPoints', nav.maxTouchPoints === undefined ? '알 수 없음' : String(nav.maxTouchPoints)],
+      ['PointerEvent', yesNo('PointerEvent' in window)],
+      ['전체화면 API', yesNo(!!(root.requestFullscreen || root.webkitRequestFullscreen))],
+      ['localStorage', yesNo(storageWorks())],
+      ['WebAudio', yesNo(!!(window.AudioContext || window.webkitAudioContext))],
+      ['ES 모듈', yesNo('noModule' in document.createElement('script'))],
+      ['CSS 변수', yesNo(!!(window.CSS && CSS.supports && CSS.supports('--a', '0')))]
+    ];
+  }
+
+  function render() {
+    var rows = collect();
+    var table = document.getElementById('rows');
+    var lines = [];
+    var i, tr, th, td;
+    while (table.firstChild) table.removeChild(table.firstChild);
+    for (i = 0; i < rows.length; i++) {
+      tr = document.createElement('tr');
+      th = document.createElement('th');
+      td = document.createElement('td');
+      th.textContent = rows[i][0];
+      td.textContent = rows[i][1];
+      if (rows[i][1] === '있음') td.className = 'yes';
+      if (rows[i][1] === '없음') td.className = 'no';
+      tr.appendChild(th);
+      tr.appendChild(td);
+      table.appendChild(tr);
+      lines.push(rows[i][0] + ': ' + rows[i][1]);
+    }
+    lines.push('최대 동시 터치: ' + maxSeen);
+    document.getElementById('report').value = lines.join('\n');
+  }
+
+  var pad = document.getElementById('pad');
+  var countEl = document.getElementById('count');
+  var colors = ['#e5483b', '#2f80ed', '#27ae60', '#f2994a', '#eb5fa0', '#2bb5b5', '#f2c94c', '#8d6e63', '#9bc53d', '#1b4f72'];
+
+  function draw(points) {
+    var old = pad.querySelectorAll('.dot');
+    var rect = pad.getBoundingClientRect();
+    var i, d;
+    for (i = 0; i < old.length; i++) pad.removeChild(old[i]);
+    for (i = 0; i < points.length; i++) {
+      d = document.createElement('div');
+      d.className = 'dot';
+      d.style.left = (points[i].clientX - rect.left) + 'px';
+      d.style.top = (points[i].clientY - rect.top) + 'px';
+      d.style.background = colors[i % colors.length];
+      pad.appendChild(d);
+    }
+    if (points.length > maxSeen) maxSeen = points.length;
+    countEl.textContent = '지금 ' + points.length + '개 / 최대 ' + maxSeen + '개';
+    render();
+  }
+
+  function onTouch(e) {
+    e.preventDefault();
+    draw(e.touches);
+  }
+
+  pad.addEventListener('touchstart', onTouch, { passive: false });
+  pad.addEventListener('touchmove', onTouch, { passive: false });
+  pad.addEventListener('touchend', onTouch, { passive: false });
+  pad.addEventListener('touchcancel', onTouch, { passive: false });
+  pad.addEventListener('mousedown', function (e) {
+    draw([{ clientX: e.clientX, clientY: e.clientY }]);
+  });
+  pad.addEventListener('mouseup', function () {
+    draw([]);
+  });
+
+  document.getElementById('fs').addEventListener('click', function () {
+    var inFs = document.fullscreenElement || document.webkitFullscreenElement;
+    if (inFs) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else if (root.requestFullscreen) {
+      root.requestFullscreen();
+    } else if (root.webkitRequestFullscreen) {
+      root.webkitRequestFullscreen();
+    }
+  });
+
+  document.getElementById('home').addEventListener('click', function () {
+    window.location.href = './';
+  });
+
+  window.addEventListener('resize', render);
+  render();
+})();
+</script>
+</body>
+</html>
