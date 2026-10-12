@@ -127,6 +127,8 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
 
   const press = (action: 'rotate' | 'flip') => {
     if (!canAct || selected === null) return;
+    // 끌고 있는 조각은 놓은 뒤에 바꾼다 (끄는 중에 바뀌면 원래 자리에서 검사돼 트레이로 튄다)
+    if (drag.isDragging(selected)) return;
     const apply = action === 'rotate' ? rotatePiece : flipPiece;
     setPieces((prev) => apply(prev, selected, area, mode));
   };

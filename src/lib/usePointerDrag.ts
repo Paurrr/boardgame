@@ -19,7 +19,19 @@ type Session<T> = { id: T; startX: number; startY: number; startTime: number; mo
 export function usePointerDrag<T>(callbacks: DragCallbacks<T>) {
   const sessions = useRef(new Map<number, Session<T>>());
 
+  function sessionOf(id: T): Session<T> | undefined {
+    for (const s of sessions.current.values()) if (s.id === id) return s;
+    return undefined;
+  }
+
+  /** 어떤 손가락이 id를 끌기 시작해 아직 놓지 않았으면 true (누르기만 한 상태는 false) */
+  function isDragging(id: T): boolean {
+    return sessionOf(id)?.moved === true;
+  }
+
   function begin(e: ReactPointerEvent<Element>, id: T, captureTarget: Element): void {
+    // 한 대상은 한 손가락만 끈다 — 두 번째 손가락·손바닥이 같은 조각을 두 번 놓지 않게
+    if (sessionOf(id)) return;
     if (typeof captureTarget.setPointerCapture === 'function') {
       try {
         captureTarget.setPointerCapture(e.pointerId);
@@ -66,5 +78,5 @@ export function usePointerDrag<T>(callbacks: DragCallbacks<T>) {
     if (s.moved) callbacks.onDragEnd(s.id, 0, 0);
   }
 
-  return { begin, move, end, cancel };
+  return { begin, move, end, cancel, isDragging };
 }

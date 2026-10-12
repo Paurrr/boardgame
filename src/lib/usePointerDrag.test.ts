@@ -99,6 +99,37 @@ describe('usePointerDrag', () => {
     expect(calls).toEqual(['start:a', 'move:a:50,0', 'end:a:0,0']);
   });
 
+  it('이미 잡힌 대상을 두 번째 손가락이 잡으면 무시한다', () => {
+    const { result } = setup();
+    const el = document.createElement('div');
+    act(() => {
+      result.current.begin(ev(1, 0, 0), 'a', el);
+      result.current.begin(ev(2, 20, 0), 'a', el);
+      result.current.move(ev(1, 30, 0));
+      result.current.move(ev(2, 50, 0));
+      result.current.end(ev(1, 30, 0));
+      result.current.end(ev(2, 50, 0));
+    });
+    expect(calls).toEqual(['start:a', 'move:a:30,0', 'end:a:30,0']);
+  });
+
+  it('isDragging은 손가락이 대상을 끌기 시작한 뒤 놓을 때까지만 true', () => {
+    const { result } = setup();
+    act(() => {
+      result.current.begin(ev(1, 0, 0), 'a', document.createElement('div'));
+    });
+    expect(result.current.isDragging('a')).toBe(false);
+    act(() => {
+      result.current.move(ev(1, 30, 0));
+    });
+    expect(result.current.isDragging('a')).toBe(true);
+    expect(result.current.isDragging('b')).toBe(false);
+    act(() => {
+      result.current.cancel(ev(1, 30, 0));
+    });
+    expect(result.current.isDragging('a')).toBe(false);
+  });
+
   it('모르는 포인터의 이동·끝은 무시한다', () => {
     const { result } = setup();
     act(() => {
