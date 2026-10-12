@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+*.local
+
+# phase execution outputs
+phases/**/phase*-output.json
+phases/**/step*-output.json
