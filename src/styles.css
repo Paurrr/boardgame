@@ -1,0 +1,51 @@
+:root {
+  --bg: #fff7ec;
+  --panel: #ffffff;
+  --ink: #2b2118;
+  --ink-soft: #6b5b4b;
+  --ink-faint: #a89a8a;
+  --target: #ede3d3;
+  --target-edge: #5b4a3a;
+  --margin-cell: #f7f0e4;
+  --grid-line: #d9ccb8;
+  --tray: #f3eadb;
+  --ok: #27ae60;
+  --warn: #e5483b;
+}
+
+html,
+body,
+#root,
+.app {
+  height: 100%;
+  margin: 0;
+}
+
+/* 칠판(1~3m 거리)에서 읽히도록 화면 짧은 변에 비례 */
+html {
+  font-size: calc(10px + 1.4vmin);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
