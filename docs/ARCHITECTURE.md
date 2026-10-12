@@ -2,19 +2,55 @@
 
 ## 디렉토리 구조
 ```
+.github/workflows/deploy.yml     # lint·test·build 후 GitHub Pages 배포
+index.html  vite.config.ts  tsconfig.json  eslint.config.js  package.json
+public/check.html                # 기기 진단 페이지 (ES5, 빌드 미경유)
 src/
-├── main.tsx, App.tsx      # 진입점, 화면 전환
-├── shell/                 # 모든 게임이 공유하는 공통 셸
-│   ├── logic/             # 순수 TS: 판 진행 상태 기계(reducer), 점수 집계, 설정 저장
-│   └── ui/                # GameMenu, PlayerSetup, PlayLayout(칸 분할), TopBar, RoundResult, FinalResult
+├── main.tsx  App.tsx  App.test.tsx  styles.css   # 진입점, 화면 전환, 전역 스타일(.btn 등)
+├── checkPage.test.ts            # check.html 검증
+├── test/setup.ts                # jest-dom, cleanup, PointerEvent 대용
+├── lib/                         # 게임 무관 공통 도구
+│   ├── difficulty.ts            # Difficulty 타입·라벨
+│   ├── random.ts                # 시드 난수, 시드 파생
+│   ├── gesture.ts               # 탭/끌기 판정 기준
+│   ├── usePointerDrag.ts        # 손가락별 끌기·탭 훅
+│   ├── useElementSize.ts        # 요소 크기 측정
+│   ├── storage.ts               # localStorage 래퍼
+│   ├── sound.ts                 # WebAudio 합성음
+│   └── fullscreen.ts            # 전체화면 (webkit 접두사 포함)
 ├── games/
-│   ├── registry.ts        # 게임 목록 (GameModule[])
-│   └── blocks/            # 블록 퍼즐 (우봉고 스타일)
-│       ├── index.ts       # GameModule 정의
-│       ├── logic/         # 순수 TS: pieces, transform, board, generator, solver
-│       └── ui/            # PlayerArea, PuzzleBoard, PieceTray, PieceView (SVG)
-└── lib/                   # random(시드 난수), usePointerDrag, sound(WebAudio), fullscreen
-public/check.html          # 기기 진단 페이지 (ES5, 빌드 미경유)
+│   ├── types.ts                 # GameModule, PlayerAreaProps (셸↔게임 계약)
+│   ├── registry.ts              # 게임 목록
+│   └── blocks/
+│       ├── index.ts             # blocksGame: GameModule
+│       ├── logic/               # 순수 TS
+│       │   ├── types.ts         # Cell, PieceId, Orientation, Placement, Puzzle, BoardArea, PlaceMode
+│       │   ├── shape.ts         # 정규화, 크기, 연결, 구멍, 테두리
+│       │   ├── transform.ts     # 회전·뒤집기·방향
+│       │   ├── pieces.ts        # 조각 10종
+│       │   ├── board.ts         # 판 영역, 놓기 규칙, 정답 판정, 제자리 회전
+│       │   ├── solver.ts        # 검증용 백트래킹 솔버
+│       │   ├── generator.ts     # 퍼즐 생성기
+│       │   └── play.ts          # 칸 하나의 조각 상태 변화(놓기·돌리기·뒤집기)
+│       └── ui/
+│           ├── layout.ts        # SVG 안 판·버튼 줄·트레이 배치 계산
+│           ├── PieceView.tsx    # 조각 하나
+│           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
+│           └── PlayerArea.module.css
+└── shell/
+    ├── logic/
+    │   ├── match.ts             # 판 진행 reducer, 점수, 남은 시간, 시드
+    │   ├── setup.ts             # 설정 기본값·정리
+    │   ├── persistence.ts       # 설정·최고기록 저장/불러오기
+    │   └── format.ts            # 시간 표시
+    └── ui/
+        ├── colors.ts            # 플레이어 색
+        ├── PlayLayout.tsx/.module.css   # 가로 칸 분할 (위 1/3 정보, 아래 2/3 조작)
+        ├── GameMenu.tsx/.module.css
+        ├── PlayerSetup.tsx/.module.css
+        ├── TopBar.tsx           # 라운드·시간·소리·전체화면·그만하기
+        ├── Match.tsx/.module.css        # 카운트다운·플레이·라운드 결과
+        └── FinalResult.tsx/.module.css
 ```
 테스트 파일은 대상 옆에 `*.test.ts(x)`로 둔다.
 
@@ -22,7 +58,7 @@ public/check.html          # 기기 진단 페이지 (ES5, 빌드 미경유)
 - **셸 + 게임 모듈**: 셸이 메뉴·설정·칸 분할·라운드·타이머·점수를 맡고, 게임은 플레이어 칸 하나(`PlayerArea`)만 책임진다. 게임은 풀었을 때 `onSolved()`만 호출한다.
   ```ts
   type GameModule = {
-    id: string; name: string; minPlayers: number; maxPlayers: number;
+    id: string; name: string; description: string; minPlayers: number; maxPlayers: number;
     PlayerArea: React.FC<{ difficulty: Difficulty; seed: number; active: boolean; onSolved: () => void }>;
   };
   ```
