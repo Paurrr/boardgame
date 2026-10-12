@@ -49,3 +49,49 @@ input {
   -webkit-user-select: text;
   user-select: text;
 }
+
+.btn {
+  min-height: 3rem;
+  padding: 0 1.2rem;
+  margin: 0 0.5rem 0.5rem 0;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--panel);
+  font-weight: bold;
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn[aria-pressed='true'],
+.btn-primary {
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
+
+/* 임시 터치 시험 화면 — 셸이 생기면 지운다 */
+.touch-test {
+  display: flex;
+  flex-direction: column;
+}
+
+.touch-test-bar {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem 0 1rem;
+}
+
+.touch-test-bar h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.touch-test-play {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
