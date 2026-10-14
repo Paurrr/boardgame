@@ -7,6 +7,7 @@
   --ink-soft: #76604a;
   --ink-faint: #b5a28a;
   --accent: #c8461f;
+  --on-accent: #ffffff;
   --pressed: #f2b53a;
   --off: #f3e9d8;
   --off-edge: #c9b79c;
@@ -82,7 +83,7 @@ input {
 
 .btn-primary {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .btn:disabled {

@@ -42,7 +42,8 @@ CSS 변수로 정의한다(`src/styles.css`의 `:root`). `oklch()`·`color-mix()
 ### 버튼 색
 | 용도 | 변수 | 값 |
 |------|------|------|
-| 주요 버튼·판의 돌리기/뒤집기 | `--accent` | `#C8461F` (벽돌색, 흰 글자) |
+| 주요 버튼·판의 돌리기/뒤집기 | `--accent` | `#C8461F` (벽돌색) |
+| 그 위 글자 | `--on-accent` | `#FFFFFF` |
 | 선택됨(눌린 버튼)·우승 표시 | `--pressed` | `#F2B53A` (노랑, 호두색 글자) |
 | 못 누르는 판 버튼 면 / 테두리 | `--off` / `--off-edge` | `#F3E9D8` / `#C9B79C` |
 
@@ -75,7 +76,7 @@ CSS 변수로 정의한다(`src/styles.css`의 `:root`). `oklch()`·`color-mix()
 그림자 대신 **두꺼운 아래 테두리**로 두께를 낸다 (`box-shadow` 금지).
 ```
 보통 (.btn):            면 --panel, 테두리 3px --ink, 아래 테두리 0.4rem, 모서리 14px, 굵게
-주요 (.btn-primary):    면 --accent, 흰 글자
+주요 (.btn-primary):    면 --accent, 글자 --on-accent
 선택됨 (aria-pressed):  면 --pressed, 눌린 모양으로 고정
 못 누름 (:disabled):    투명도 0.4
 ```
