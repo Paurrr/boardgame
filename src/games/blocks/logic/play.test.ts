@@ -15,7 +15,7 @@ const start = (): PieceState[] => initialPieces(['I3', 'L3']);
 const pieceOf = (pieces: PieceState[], id: string) => pieces.find((p) => p.pieceId === id) as PieceState;
 
 describe('initialPieces', () => {
-  it('모든 조각이 기본 방향으로 트레이에 있다', () => {
+  it('모든 조각이 기본 방향으로 판 밖에 있다', () => {
     expect(start()).toEqual([
       { pieceId: 'I3', orientation: { rotation: 0, flipped: false }, at: null },
       { pieceId: 'L3', orientation: { rotation: 0, flipped: false }, at: null },
@@ -29,7 +29,7 @@ describe('dropPiece', () => {
     expect(pieceOf(next, 'I3').at).toEqual(at(1, 1));
   });
 
-  it('inside에서 목표 밖이면 트레이로 돌아간다', () => {
+  it('inside에서 목표 밖이면 판에서 빠진다', () => {
     const next = dropPiece(start(), 'I3', at(2, 1), AREA, 'inside');
     expect(pieceOf(next, 'I3').at).toBeNull();
   });
@@ -39,12 +39,12 @@ describe('dropPiece', () => {
     expect(pieceOf(next, 'I3').at).toEqual(at(2, 0));
   });
 
-  it('판 밖이면 트레이로 돌아간다', () => {
+  it('판 격자 밖이면 판에서 빠진다', () => {
     const next = dropPiece(start(), 'I3', at(4, 0), AREA, 'free');
     expect(pieceOf(next, 'I3').at).toBeNull();
   });
 
-  it('다른 조각과 겹치면 트레이로 돌아간다', () => {
+  it('다른 조각과 겹치면 판에서 빠진다', () => {
     const placed = dropPiece(start(), 'I3', at(1, 1), AREA, 'free');
     const next = dropPiece(placed, 'L3', at(2, 0), AREA, 'free');
     expect(pieceOf(next, 'L3').at).toBeNull();
@@ -56,7 +56,7 @@ describe('dropPiece', () => {
     expect(pieceOf(next, 'I3').at).toEqual(at(1, 0));
   });
 
-  it('null을 주면 트레이로 보낸다', () => {
+  it('null을 주면 판에서 뺀다', () => {
     const placed = dropPiece(start(), 'I3', at(1, 1), AREA, 'free');
     expect(pieceOf(dropPiece(placed, 'I3', null, AREA, 'free'), 'I3').at).toBeNull();
   });
@@ -69,7 +69,7 @@ describe('dropPiece', () => {
 });
 
 describe('rotatePiece', () => {
-  it('트레이 조각은 방향만 돈다', () => {
+  it('판 밖 조각은 방향만 돈다', () => {
     const next = rotatePiece(start(), 'I3', AREA, 'free');
     expect(pieceOf(next, 'I3')).toEqual({ pieceId: 'I3', orientation: { rotation: 1, flipped: false }, at: null });
   });
@@ -80,7 +80,7 @@ describe('rotatePiece', () => {
     expect(pieceOf(next, 'I3')).toEqual({ pieceId: 'I3', orientation: { rotation: 1, flipped: false }, at: at(2, 0) });
   });
 
-  it('판 위에서 돌려서 안 맞으면 돌린 채로 트레이로 간다', () => {
+  it('판 위에서 돌려서 안 맞으면 돌린 채로 판에서 빠진다', () => {
     const placed = dropPiece(start(), 'I3', at(1, 1), AREA, 'inside');
     const next = rotatePiece(placed, 'I3', AREA, 'inside');
     expect(pieceOf(next, 'I3')).toEqual({ pieceId: 'I3', orientation: { rotation: 1, flipped: false }, at: null });
@@ -88,7 +88,7 @@ describe('rotatePiece', () => {
 });
 
 describe('flipPiece', () => {
-  it('트레이 조각은 방향만 뒤집힌다', () => {
+  it('판 밖 조각은 방향만 뒤집힌다', () => {
     const next = flipPiece(start(), 'L3', AREA, 'free');
     expect(pieceOf(next, 'L3').orientation).toEqual({ rotation: 0, flipped: true });
     expect(pieceOf(next, 'L3').at).toBeNull();
@@ -101,7 +101,7 @@ describe('flipPiece', () => {
     expect(pieceOf(next, 'L3').orientation.flipped).toBe(true);
   });
 
-  it('판 위에서 뒤집어서 안 맞으면 트레이로 간다', () => {
+  it('판 위에서 뒤집어서 안 맞으면 판에서 빠진다', () => {
     const placed = dropPiece(start(), 'L3', at(1, 2), AREA, 'inside');
     expect(pieceOf(placed, 'L3').at).toEqual(at(1, 2));
     const next = flipPiece(placed, 'L3', AREA, 'inside');
@@ -118,7 +118,7 @@ describe('placementsOf', () => {
 });
 
 describe('piecesSolved', () => {
-  it('생성된 퍼즐의 정답대로 놓으면 true, 하나라도 트레이면 false', () => {
+  it('생성된 퍼즐의 정답대로 놓으면 true, 하나라도 판 밖이면 false', () => {
     const puzzle = generatePuzzle(createRng(5), 'normal');
     const area = boardAreaFor(puzzle.target, 'normal');
     const solvedPieces: PieceState[] = puzzle.solution.map((s) => ({

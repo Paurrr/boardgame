@@ -6,10 +6,39 @@ import { generatePuzzle } from '../logic/generator';
 import { PIECES } from '../logic/pieces';
 import { shapeSize } from '../logic/shape';
 import { orient } from '../logic/transform';
-import { bestLayout, cellSizeFor, trayPosition } from './layout';
+import { bestLayout, cellSizeFor, freeAreas, PAD, SLOT, trayPosition, visibleArea } from './layout';
+import type { Point, Rect } from './layout';
 import { PlayerArea } from './PlayerArea';
 
 const noop = () => {};
+
+/** transform="translate(x y)"의 x, y */
+function translateOf(el: Element): Point {
+  const m = /translate\(([^ ]+) ([^)]+)\)/.exec(el.getAttribute('transform') ?? '');
+  if (!m) throw new Error('transform 없음');
+  return { x: Number(m[1]), y: Number(m[2]) };
+}
+
+function expectAt(el: Element, p: Point) {
+  const t = translateOf(el);
+  expect(t.x).toBeCloseTo(p.x);
+  expect(t.y).toBeCloseTo(p.y);
+}
+
+/** 손가락 하나로 조각을 from(지금 그려진 자리)에서 to로 끌어 놓는다 (SVG 좌표) */
+function dragTo(piece: Element, svg: Element, from: Point, to: Point, scale: number, pointerId: number) {
+  const dx = (to.x - from.x) * scale;
+  const dy = (to.y - from.y) * scale;
+  fireEvent.pointerDown(piece, { pointerId, clientX: 0, clientY: 0 });
+  fireEvent.pointerMove(svg, { pointerId, clientX: dx, clientY: dy });
+  fireEvent.pointerUp(svg, { pointerId, clientX: dx, clientY: dy });
+}
+
+/** 버튼 줄 아래 영역 왼쪽 끝, 위아래 가운데 — 돌려도 영역 안에 들어가는 빈 곳 */
+function looseSpot(free: Rect[], size: { w: number; h: number }): Point {
+  const below = free[0];
+  return { x: below.x, y: below.y + (below.h - size.h) / 2 };
+}
 
 describe('PlayerArea', () => {
   afterEach(() => {
@@ -126,7 +155,8 @@ describe('PlayerArea', () => {
       const piece = screen.getAllByTestId('piece').find((el) => el.getAttribute('data-piece') === pieceId);
       if (!piece) throw new Error('조각 없음: ' + pieceId);
       const from = trayPosition(layout.slots[index], size.w, size.h);
-      return { piece, svg: screen.getByTestId('puzzle-svg'), area, layout, scale, size, from };
+      const free = freeAreas(layout, area, visibleArea(layout, W, H));
+      return { piece, svg: screen.getByTestId('puzzle-svg'), area, layout, scale, size, from, free };
     }
     throw new Error('가로로 긴 조각이 있는 퍼즐을 못 찾음');
   }
@@ -164,5 +194,85 @@ describe('PlayerArea', () => {
     fireEvent.pointerUp(svg, { pointerId: 2, clientX: scale, clientY: -scale });
     expect(piece).toHaveAttribute('data-placed', 'yes');
     expect(piece.getAttribute('transform')).toBe(`translate(${corner.x + 1} ${corner.y - 1})`);
+  });
+
+  it('판 밖 빈 곳에 놓으면 그 자리에 남는다', () => {
+    const { piece, svg, scale, size, from, free } = renderWidePiece();
+    const spot = looseSpot(free, size);
+    dragTo(piece, svg, from, spot, scale, 1);
+    expect(piece).toHaveAttribute('data-placed', 'no');
+    expectAt(piece, spot);
+  });
+
+  it('빈 곳에 둔 뒤 판 위 잘못된 자리에 놓으면 슬롯이 아니라 그 빈 곳으로 돌아간다', () => {
+    const { piece, svg, area, layout, scale, size, from, free } = renderWidePiece();
+    const spot = looseSpot(free, size);
+    dragTo(piece, svg, from, spot, scale, 1);
+    // 판 오른쪽 끝 칸에 걸쳐 나머지는 판 밖
+    dragTo(piece, svg, spot, { x: layout.boardX + area.width - 1, y: layout.boardY }, scale, 2);
+    expect(piece).toHaveAttribute('data-placed', 'no');
+    expectAt(piece, spot);
+  });
+
+  it('판에 놓인 조각을 빈 곳으로 끌어내면 판에서 빠지고 그 자리에 남는다', () => {
+    const { piece, svg, layout, scale, size, from, free } = renderWidePiece();
+    const onBoard = { x: layout.boardX, y: layout.boardY };
+    dragTo(piece, svg, from, onBoard, scale, 1);
+    expect(piece).toHaveAttribute('data-placed', 'yes');
+    const spot = looseSpot(free, size);
+    dragTo(piece, svg, onBoard, spot, scale, 2);
+    expect(piece).toHaveAttribute('data-placed', 'no');
+    expectAt(piece, spot);
+  });
+
+  it('빈 곳에 둔 조각을 돌리면 그 자리에서 돈다', () => {
+    const { piece, svg, scale, size, from, free } = renderWidePiece();
+    const spot = looseSpot(free, size);
+    dragTo(piece, svg, from, spot, scale, 1);
+    fireEvent.pointerDown(screen.getByRole('button', { name: '돌리기' }));
+    expect(piece).toHaveAttribute('data-rotation', '1');
+    expectAt(piece, { x: spot.x + (size.w - size.h) / 2, y: spot.y + (size.h - size.w) / 2 });
+    for (let i = 0; i < 3; i++) fireEvent.pointerDown(screen.getByRole('button', { name: '돌리기' }));
+    expectAt(piece, spot);
+  });
+
+  it('퍼즐 그림 바깥이어도 칸 안 빈 곳이면 두고, 칸 밖으로 끌면 가장자리에서 멈춘다', () => {
+    // 가로로 넓은 칸 → 퍼즐 그림 좌우로 빈 곳이 생긴다
+    const W = 1600;
+    const H = 600;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: W, height: H } as DOMRect);
+    const puzzle = generatePuzzle(createRng(7), 'normal');
+    const layout = bestLayout(boardAreaFor(puzzle.target, 'normal'), puzzle.pieceIds.length, W, H);
+    const scale = cellSizeFor(layout, W, H);
+    const view = visibleArea(layout, W, H);
+    expect(view.x).toBeLessThan(-SLOT);
+    render(<PlayerArea difficulty="normal" seed={7} active onSolved={noop} />);
+    const svg = screen.getByTestId('puzzle-svg');
+    const first = screen.getAllByTestId('piece')[0];
+    const size = shapeSize(PIECES[puzzle.pieceIds[0]].cells);
+    const from = trayPosition(layout.slots[0], size.w, size.h);
+
+    const spot = { x: view.x + PAD + 0.25, y: from.y };
+    dragTo(first, svg, from, spot, scale, 1);
+    expectAt(first, spot);
+
+    dragTo(first, svg, spot, { x: view.x - 10, y: spot.y }, scale, 2);
+    expectAt(first, { x: view.x + PAD, y: spot.y });
+  });
+
+  it('끌어 놓은 조각은 놓은 뒤에도 맨 위에 그려진다', () => {
+    const W = 600;
+    const H = 1000;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: W, height: H } as DOMRect);
+    const puzzle = generatePuzzle(createRng(7), 'normal');
+    const layout = bestLayout(boardAreaFor(puzzle.target, 'normal'), puzzle.pieceIds.length, W, H);
+    const scale = cellSizeFor(layout, W, H);
+    render(<PlayerArea difficulty="normal" seed={7} active onSolved={noop} />);
+    const first = screen.getAllByTestId('piece')[0];
+    const size = shapeSize(PIECES[puzzle.pieceIds[0]].cells);
+    const from = trayPosition(layout.slots[0], size.w, size.h);
+    dragTo(first, screen.getByTestId('puzzle-svg'), from, { x: from.x + 0.5, y: from.y }, scale, 1);
+    const all = screen.getAllByTestId('piece');
+    expect(all[all.length - 1]).toBe(first);
   });
 });

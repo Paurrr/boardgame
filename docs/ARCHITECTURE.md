@@ -28,12 +28,12 @@ src/
 │       │   ├── shape.ts         # 정규화, 크기, 연결, 구멍, 테두리
 │       │   ├── transform.ts     # 회전·뒤집기·방향
 │       │   ├── pieces.ts        # 조각 10종
-│       │   ├── board.ts         # 판 영역, 놓기 규칙, 정답 판정, 제자리 회전
+│       │   ├── board.ts         # 판 영역, 놓기 규칙, 판 걸침 판정, 정답 판정, 제자리 회전
 │       │   ├── solver.ts        # 검증용 백트래킹 솔버
 │       │   ├── generator.ts     # 퍼즐 생성기
 │       │   └── play.ts          # 칸 하나의 조각 상태 변화(놓기·돌리기·뒤집기)
 │       └── ui/
-│           ├── layout.ts        # SVG 안 판·버튼 줄·트레이 배치 계산
+│           ├── layout.ts        # SVG 안 판·버튼 줄·트레이 배치와 판 밖 조각을 둘 빈 영역 계산
 │           ├── MenuIcon.tsx     # 메뉴 카드 그림 (GameModule.Icon)
 │           ├── PieceView.tsx    # 조각 하나
 │           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
@@ -81,4 +81,5 @@ matchReducer ─(roundPoints, 총점)→ RoundResult / FinalResult
 - 판 진행(단계·라운드·해결 순서·점수)은 `shell/logic`의 순수 reducer + `useReducer`.
 - 남은 시간은 라운드 시작 시각 기준으로 계산하고 화면 갱신 주기에 맞춰 표시한다.
 - 각 칸의 퍼즐 상태(조각 위치·방향)는 `PlayerArea` 내부 상태. 드래그 중 좌표는 상태로 올리지 않고 SVG 요소의 `transform`을 직접 갱신, 놓을 때만 커밋한다.
+- 판 밖에 둔 자리와 그리는 순서는 규칙과 무관한 화면 상태라 `PlayerArea`에만 둔다. logic의 `PieceState.at`은 판 밖이면 `null`일 뿐이다.
 - 영속 데이터는 `localStorage`만 사용 (마지막 설정, 1인 최고기록). 접근은 try/catch로 감싸고 실패해도 동작해야 한다.

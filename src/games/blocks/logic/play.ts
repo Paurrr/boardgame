@@ -2,7 +2,7 @@ import { canPlace, flipPlacement, isSolved, rotatePlacement } from './board';
 import { flipOrientation, rotateOrientation } from './transform';
 import type { BoardArea, Cell, Orientation, PieceId, Placement, PlaceMode } from './types';
 
-/** 플레이어 칸 하나의 조각 상태. at이 null이면 트레이에 있다 */
+/** 플레이어 칸 하나의 조각 상태. at이 null이면 판 밖(트레이·작업 영역)에 있다 */
 export type PieceState = { pieceId: PieceId; orientation: Orientation; at: Cell | null };
 
 export function initialPieces(pieceIds: readonly PieceId[]): PieceState[] {
@@ -24,7 +24,7 @@ function find(pieces: readonly PieceState[], pieceId: PieceId): PieceState {
   return piece;
 }
 
-/** next.at이 있으면 놓기 규칙을 검사하고, 안 되면 트레이(at: null)로 보낸다 */
+/** next.at이 있으면 놓기 규칙을 검사하고, 안 되면 판 밖(at: null)으로 보낸다 */
 function settle(pieces: readonly PieceState[], next: PieceState, area: BoardArea, mode: PlaceMode): PieceState[] {
   let settled = next;
   if (next.at) {

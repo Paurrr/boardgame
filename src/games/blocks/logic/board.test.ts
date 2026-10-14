@@ -8,6 +8,7 @@ import {
   placedCells,
   placeModeOf,
   rotatePlacement,
+  touchesBoard,
 } from './board';
 import { PIECE_IDS } from './pieces';
 import type { BoardArea, Cell, Placement } from './types';
@@ -85,6 +86,23 @@ describe('canPlace — free(보통·어려움)', () => {
   it('겹치면 안 놓인다', () => {
     const other: Placement = { pieceId: 'I3', orientation: BASE, at: at(0, 0) };
     expect(canPlace(AREA, [other], { pieceId: 'L3', orientation: BASE, at: at(2, 0) }, 'free')).toBe(false);
+  });
+});
+
+describe('touchesBoard', () => {
+  it('칸 하나라도 판 안에 있으면 true', () => {
+    expect(touchesBoard(AREA, { pieceId: 'I3', orientation: BASE, at: at(4, 0) })).toBe(true);
+  });
+
+  it('판 가장자리 바로 바깥에 붙어 있으면 false', () => {
+    expect(touchesBoard(AREA, { pieceId: 'I3', orientation: BASE, at: at(5, 0) })).toBe(false);
+    expect(touchesBoard(AREA, { pieceId: 'I3', orientation: BASE, at: at(0, -1) })).toBe(false);
+    expect(touchesBoard(AREA, { pieceId: 'I3', orientation: BASE, at: at(0, 4) })).toBe(false);
+  });
+
+  it('빈 모서리만 판에 걸치면 false', () => {
+    // L3의 빈 칸 (1,0)이 판 왼쪽 아래 구석 (0,3)에 온다
+    expect(touchesBoard(AREA, { pieceId: 'L3', orientation: BASE, at: at(-1, 3) })).toBe(false);
   });
 });
 

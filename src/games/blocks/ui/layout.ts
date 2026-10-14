@@ -10,6 +10,7 @@ export const ACTION_H = 2;
 export const PAD = 0.5;
 
 export type Point = { x: number; y: number };
+export type Rect = { x: number; y: number; w: number; h: number };
 
 export type Layout = {
   width: number;
@@ -56,4 +57,51 @@ export function bestLayout(area: BoardArea, pieceCount: number, containerW: numb
 /** w×h 모양을 슬롯 가운데에 둘 때 왼쪽 위 */
 export function trayPosition(slot: Point, w: number, h: number): Point {
   return { x: slot.x + (SLOT - w) / 2, y: slot.y + (SLOT - h) / 2 };
+}
+
+/** preserveAspectRatio="xMidYMax meet"으로 칸(px)에 맞췄을 때 화면에 보이는 SVG 좌표 범위 */
+export function visibleArea(layout: Layout, containerW: number, containerH: number): Rect {
+  const s = cellSizeFor(layout, containerW, containerH);
+  if (!(s > 0)) return { x: 0, y: 0, w: layout.width, h: layout.height };
+  const w = containerW / s;
+  const h = containerH / s;
+  return { x: (layout.width - w) / 2, y: layout.height - h, w, h };
+}
+
+/**
+ * 판 밖 조각을 둘 수 있는 영역: 보이는 범위 view에서 판과 버튼 줄을 뺀 곳 (가장자리는 PAD만큼 띄운다).
+ * 버튼 줄 아래, 판 왼쪽, 판 오른쪽, 판 위 순서. 버튼 줄 아래는 트레이가 들어가는 크기라 어떤 조각이든 들어간다
+ */
+export function freeAreas(layout: Layout, area: BoardArea, view: Rect): Rect[] {
+  const left = view.x + PAD;
+  const right = view.x + view.w - PAD;
+  const top = view.y + PAD;
+  const bottom = view.y + view.h - PAD;
+  const trayY = layout.actionY + ACTION_H;
+  const boardRight = layout.boardX + area.width;
+  return [
+    { x: left, y: trayY, w: right - left, h: bottom - trayY },
+    { x: left, y: top, w: layout.boardX - left, h: layout.actionY - top },
+    { x: boardRight, y: top, w: right - boardRight, h: layout.actionY - top },
+    { x: layout.boardX, y: top, w: area.width, h: layout.boardY - top },
+  ];
+}
+
+const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
+
+/** w×h 조각을 왼쪽 위 p 근처의 빈 영역 안으로 당긴다. 들어가는 영역 중 가장 덜 움직이는 쪽 */
+export function freeSpot(free: readonly Rect[], p: Point, w: number, h: number): Point {
+  let best = p;
+  let bestDist = Infinity;
+  // 버튼 줄 아래 영역(freeAreas의 첫 영역)에는 어떤 조각이든 적어도 들어간다
+  for (const r of free) {
+    if (r.w < w || r.h < h) continue;
+    const c = { x: clamp(p.x, r.x, r.x + r.w - w), y: clamp(p.y, r.y, r.y + r.h - h) };
+    const d = (c.x - p.x) ** 2 + (c.y - p.y) ** 2;
+    if (d < bestDist) {
+      best = c;
+      bestDist = d;
+    }
+  }
+  return best;
 }

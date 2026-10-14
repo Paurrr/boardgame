@@ -36,6 +36,11 @@ export function canPlace(area: BoardArea, others: readonly Placement[], p: Place
   return true;
 }
 
+/** 칸 하나라도 판 격자 안에 들어오면 true — 판에 놓으려던 것으로 본다 */
+export function touchesBoard(area: BoardArea, p: Placement): boolean {
+  return placedCells(p).some((c) => c.x >= 0 && c.y >= 0 && c.x < area.width && c.y < area.height);
+}
+
 /** 목표 칸을 전부 덮고, 목표 밖에 놓인 칸이 하나도 없으면 정답 */
 export function isSolved(target: readonly Cell[], placements: readonly Placement[]): boolean {
   const targetSet = new Set(target.map(cellKey));

@@ -4,7 +4,7 @@ import { createRng } from '../../../lib/random';
 import { useElementSize } from '../../../lib/useElementSize';
 import { usePointerDrag } from '../../../lib/usePointerDrag';
 import type { PlayerAreaProps } from '../../types';
-import { boardAreaFor, placeModeOf } from '../logic/board';
+import { boardAreaFor, placeModeOf, touchesBoard } from '../logic/board';
 import { generatePuzzle } from '../logic/generator';
 import { dropPiece, flipPiece, initialPieces, piecesSolved, rotatePiece } from '../logic/play';
 import type { PieceState } from '../logic/play';
@@ -12,8 +12,8 @@ import { PIECES } from '../logic/pieces';
 import { cellKey, outlinePath, shapeSize } from '../logic/shape';
 import { orient } from '../logic/transform';
 import type { PieceId } from '../logic/types';
-import { bestLayout, cellSizeFor, trayPosition } from './layout';
-import type { Layout, Point } from './layout';
+import { bestLayout, cellSizeFor, freeAreas, freeSpot, trayPosition, visibleArea } from './layout';
+import type { Layout, Point, Rect } from './layout';
 import { PieceView } from './PieceView';
 import styles from './PlayerArea.module.css';
 
@@ -26,11 +26,19 @@ const BUTTON_RADIUS = 0.32;
 
 const translate = (p: Point) => `translate(${p.x} ${p.y})`;
 
-/** 조각의 왼쪽 위 (SVG 좌표): 판 위면 판 칸, 아니면 자기 트레이 슬롯 가운데 */
-function piecePosition(piece: PieceState, index: number, layout: Layout): Point {
+/** 판 밖에 둔 조각의 가운데 (SVG 좌표). 가운데로 기억해야 돌려도 그 자리에서 돈다 */
+type Loose = Partial<Record<PieceId, Point>>;
+
+const sizeOf = (piece: PieceState) => shapeSize(orient(PIECES[piece.pieceId].cells, piece.orientation));
+
+/** 조각의 왼쪽 위 (SVG 좌표): 판 위면 판 칸, 판 밖에 둔 적 있으면 그 자리, 아니면 자기 트레이 슬롯 가운데 */
+function piecePosition(piece: PieceState, index: number, layout: Layout, free: Rect[], loose: Loose): Point {
   if (piece.at) return { x: layout.boardX + piece.at.x, y: layout.boardY + piece.at.y };
-  const { w, h } = shapeSize(orient(PIECES[piece.pieceId].cells, piece.orientation));
-  return trayPosition(layout.slots[index], w, h);
+  const { w, h } = sizeOf(piece);
+  const center = loose[piece.pieceId];
+  if (!center) return trayPosition(layout.slots[index], w, h);
+  // 돌려서 길어졌거나 칸 크기가 바뀌어도 빈 영역 밖으로 나가지 않게
+  return freeSpot(free, { x: center.x - w / 2, y: center.y - h / 2 }, w, h);
 }
 
 type ActionButtonProps = { x: number; y: number; label: string; disabled: boolean; onPress: () => void };
@@ -73,7 +81,9 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
 
   const [pieces, setPieces] = useState<PieceState[]>(() => initialPieces(puzzle.pieceIds));
   const [selected, setSelected] = useState<PieceId | null>(null);
-  const [dragging, setDragging] = useState<PieceId | null>(null);
+  const [loose, setLoose] = useState<Loose>({});
+  /** 그리는 순서. 마지막에 끈 조각이 맨 뒤(맨 위) */
+  const [order, setOrder] = useState<PieceId[]>(() => [...puzzle.pieceIds]);
   const { ref: boxRef, size } = useElementSize<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const pieceEls = useRef(new Map<PieceId, SVGGElement>());
@@ -84,6 +94,8 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
   const layout = bestLayout(area, pieces.length, size.width, size.height);
   /** 퍼즐 칸 하나의 화면 크기(px). 아직 못 쟀으면 1 */
   const scale = cellSizeFor(layout, size.width, size.height) || 1;
+  /** 판 밖 조각을 둘 수 있는 곳: 퍼즐 칸에 보이는 범위 전체에서 판과 버튼 줄을 뺀 곳 */
+  const free = freeAreas(layout, area, visibleArea(layout, size.width, size.height));
 
   useEffect(() => {
     if (solved && !reported.current) {
@@ -94,12 +106,12 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
 
   const positionOf = (id: PieceId): Point => {
     const i = pieces.findIndex((p) => p.pieceId === id);
-    return piecePosition(pieces[i], i, layout);
+    return piecePosition(pieces[i], i, layout, free, loose);
   };
   const moveEl = (id: PieceId, p: Point) => pieceEls.current.get(id)?.setAttribute('transform', translate(p));
 
   const drag = usePointerDrag<PieceId>({
-    onDragStart: (id) => setDragging(id),
+    onDragStart: (id) => setOrder((prev) => [...prev.filter((p) => p !== id), id]),
     onDragMove: (id, dx, dy) => {
       const base = positionOf(id);
       // 끄는 동안은 React 렌더 없이 transform만 바꾼다 (약한 칠판 SoC 대비)
@@ -109,14 +121,24 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
       const base = positionOf(id);
       // 놓은 결과가 원래 자리와 같으면 React가 transform을 다시 쓰지 않으므로 직접 되돌린다
       moveEl(id, base);
-      setDragging(null);
       if (!canAct) return;
+      const dropped = { x: base.x + dx / scale, y: base.y + dy / scale };
       // + 0 은 -0 을 0 으로 바꾼다
       const at = {
-        x: Math.round(base.x + dx / scale - layout.boardX) + 0,
-        y: Math.round(base.y + dy / scale - layout.boardY) + 0,
+        x: Math.round(dropped.x - layout.boardX) + 0,
+        y: Math.round(dropped.y - layout.boardY) + 0,
       };
-      setPieces((prev) => dropPiece(prev, id, at, area, mode));
+      const piece = pieces.find((p) => p.pieceId === id);
+      if (!piece) return;
+      if (touchesBoard(area, { pieceId: id, orientation: piece.orientation, at })) {
+        // 판에 안 맞으면 at이 null이 되어 마지막에 둔 자리로 돌아간다
+        setPieces((prev) => dropPiece(prev, id, at, area, mode));
+        return;
+      }
+      const { w, h } = sizeOf(piece);
+      const spot = freeSpot(free, dropped, w, h);
+      setLoose((prev) => ({ ...prev, [id]: { x: spot.x + w / 2, y: spot.y + h / 2 } }));
+      setPieces((prev) => dropPiece(prev, id, null, area, mode));
     },
     onTap: (id) => {
       if (canAct) setPieces((prev) => rotatePiece(prev, id, area, mode));
@@ -131,15 +153,12 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
 
   const press = (action: 'rotate' | 'flip') => {
     if (!canAct || selected === null) return;
-    // 끌고 있는 조각은 놓은 뒤에 바꾼다 (끄는 중에 바뀌면 원래 자리에서 검사돼 트레이로 튄다)
+    // 끌고 있는 조각은 놓은 뒤에 바꾼다 (끄는 중에 바뀌면 원래 자리에서 검사돼 판 밖으로 튄다)
     if (drag.isDragging(selected)) return;
     const apply = action === 'rotate' ? rotatePiece : flipPiece;
     setPieces((prev) => apply(prev, selected, area, mode));
   };
 
-  const ordered = dragging
-    ? [...pieces.filter((p) => p.pieceId !== dragging), ...pieces.filter((p) => p.pieceId === dragging)]
-    : pieces;
   const showFlip = difficulty !== 'easy';
   const buttonCount = showFlip ? 2 : 1;
   const buttonsX = (layout.width - (buttonCount * BUTTON_W + (buttonCount - 1) * BUTTON_GAP)) / 2;
@@ -190,13 +209,14 @@ function PlayerAreaImpl({ difficulty, seed, active, onSolved }: PlayerAreaProps)
           />
         )}
 
-        {ordered.map((piece) => {
-          const index = pieces.indexOf(piece);
+        {order.map((id) => {
+          const index = pieces.findIndex((p) => p.pieceId === id);
+          const piece = pieces[index];
           return (
             <PieceView
               key={piece.pieceId}
               piece={piece}
-              {...piecePosition(piece, index, layout)}
+              {...piecePosition(piece, index, layout, free, loose)}
               selected={selected === piece.pieceId}
               registerRef={(el) => {
                 if (el) pieceEls.current.set(piece.pieceId, el);
