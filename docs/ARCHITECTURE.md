@@ -6,7 +6,7 @@
 index.html  vite.config.ts  tsconfig.json  eslint.config.js  package.json
 public/check.html                # 기기 진단 페이지 (ES5, 빌드 미경유)
 src/
-├── main.tsx  App.tsx  App.test.tsx  styles.css   # 진입점, 화면 전환, 전역 스타일(.btn 등)
+├── main.tsx  App.tsx  App.test.tsx  styles.css   # 진입점, 화면 전환, 전역 스타일(:root 색 변수, .btn 등)
 ├── checkPage.test.ts            # check.html 검증
 ├── test/setup.ts                # jest-dom, cleanup, PointerEvent 대용
 ├── lib/                         # 게임 무관 공통 도구
@@ -37,7 +37,7 @@ src/
 │           ├── MenuIcon.tsx     # 메뉴 카드 그림 (GameModule.Icon)
 │           ├── PieceView.tsx    # 조각 하나
 │           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
-│           └── PlayerArea.module.css
+│           └── PlayerArea.module.css  # 칸·조각·판 버튼 스타일 (MenuIcon도 함께 씀)
 └── shell/
     ├── logic/
     │   ├── match.ts             # 판 진행 reducer, 점수, 남은 시간, 시드
