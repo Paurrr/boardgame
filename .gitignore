@@ -7,3 +7,6 @@ coverage/
 # phase execution outputs
 phases/**/phase*-output.json
 phases/**/step*-output.json
+
+# 칠판 사진 등 개인 자료 (공개 저장소에 올리지 않는다)
+data/

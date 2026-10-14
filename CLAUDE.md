@@ -1,18 +1,22 @@
 # 프로젝트: 우리집 보드게임
 
-7~8년 된 LG 전자칠판(Android 8 내장 Chrome, 4K, 멀티터치) 브라우저에서 아이들과 함께 하는 보드게임 웹앱. 첫 게임은 "블록 퍼즐"(우봉고 스타일). 설계: `docs/superpowers/specs/2026-10-12-blocks-puzzle-design.md`
+집의 LG 전자칠판 55TR3DK(Android 11 내장 Chrome 99, CSS 1280×720 @ DPR 3 = 4K, 17점 멀티터치) 브라우저에서 아이들과 함께 하는 보드게임 웹앱. 첫 게임은 "블록 퍼즐"(우봉고 스타일). 설계: `docs/superpowers/specs/2026-10-12-blocks-puzzle-design.md`
 
 ## 기술 스택
 - Vite + React + TypeScript (strict mode)
 - 게임 화면은 SVG, 스타일은 일반 CSS (CSS Modules)
-- `@vitejs/plugin-legacy`로 구형 Chrome 호환 번들 생성
+- 빌드 대상은 칠판 실측 Chrome 99 (`build.target`·`cssTarget` = `chrome99`). 더 오래된 기기 대응은 `docs/ADR.md` ADR-006의 복구 절차
 - Vitest (+ React Testing Library), ESLint
 - 배포: GitHub Pages (`base: '/boardgame/'`), GitHub Actions
 
 ## 아키텍처 규칙
 - CRITICAL: 게임 규칙·진행 로직(`src/games/*/logic`, `src/shell/logic`)은 React/DOM에 의존하지 않는 순수 TypeScript로 작성하고 Vitest로 검증할 것
 - CRITICAL: 서버·외부 API 호출 금지. 완전한 정적 사이트로 유지할 것 (저장은 `localStorage`만)
-- CRITICAL: 칠판의 구형 Chrome에서 동작해야 한다. Tailwind v4, flexbox `gap`, `aspect-ratio`, `inset`, CSS nesting, `:is()/:where()`, `oklch()/color-mix()`, container query 등 최신 CSS를 쓰지 말 것 (JS는 plugin-legacy가 변환하지만 CSS 기능은 폴리필되지 않음)
+- CRITICAL: 칠판의 Chrome 99에서 동작해야 한다. 폴리필이 없으므로 CSS·JS 모두 Chrome 99가 지원하는 것만 쓸 것
+  - CSS 허용: flexbox `gap`, `aspect-ratio`, `inset`, `:is()/:where()`, CSS 변수
+  - CSS 금지: CSS nesting(112+), container query(105+), `:has()`(105+), `oklch()/color-mix()`(111+), Tailwind v4
+  - JS: ES2022까지 (`tsconfig` lib이 막는다). `toSorted()` 같은 ES2023+ API 금지
+  - 멀티터치를 `navigator.maxTouchPoints`로 판단하지 말 것 (칠판은 1로 보고하지만 실제 17점)
 - CRITICAL: `public/check.html`은 빌드를 거치지 않으므로 ES5 문법만 쓸 것
 - CRITICAL: "우봉고" 이름·원작 카드·그림을 쓰지 말 것 (KOSMOS 상표). 퍼즐은 생성기로 만든다
 - 플레이어 칸은 가로로 나란히 배치하고 조작 영역은 칸의 아래쪽 2/3에 둘 것 (2×2 분할 금지 — 아이 손이 윗줄에 닿지 않음)
@@ -26,7 +30,7 @@
 
 ## 명령어
 npm run dev      # 개발 서버
-npm run build    # 프로덕션 빌드 (legacy 번들 포함)
+npm run build    # 프로덕션 빌드 (Chrome 99 대상)
 npm run preview  # 빌드 결과 미리보기
 npm run lint     # ESLint
 npm run test     # 테스트

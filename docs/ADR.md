@@ -8,12 +8,12 @@
 ### ADR-001: 안드로이드 앱 대신 웹앱
 **결정**: 정적 웹앱(SPA)으로 만들고 칠판 내장 브라우저로 접속한다.
 **이유**: 칠판에 Play Store가 없어 APK를 수동 설치해야 하고, 출처를 알 수 없는 앱 설치가 막혀 있을 수 있다. 웹은 URL만 열면 되고, 업데이트가 즉시 반영되며, 집의 다른 기기에서도 그대로 된다.
-**트레이드오프**: 칠판 브라우저 버전에 묶인다(→ ADR-002의 legacy 빌드로 대응). 오프라인 플레이는 MVP에서 지원하지 않는다.
+**트레이드오프**: 칠판 브라우저 버전에 묶인다(→ ADR-006에서 실측한 Chrome 99에 맞춘다). 오프라인 플레이는 MVP에서 지원하지 않는다.
 
-### ADR-002: Vite + React + TypeScript + SVG, plugin-legacy
-**결정**: Vite로 빌드하는 React+TS 앱. 퍼즐·조각은 SVG로 그리고 `@vitejs/plugin-legacy`로 구형 Chrome용 번들을 함께 만든다.
+### ADR-002: Vite + React + TypeScript + SVG
+**결정**: Vite로 빌드하는 React+TS 앱. 퍼즐·조각은 SVG로 그린다. 처음에는 `@vitejs/plugin-legacy`로 구형 Chrome용 번들도 함께 만들었으나, 칠판 실측 뒤 ADR-006에서 뺐다.
 **이유**: 게임이 늘어날수록 메뉴·설정·점수판 같은 UI를 컴포넌트로 재사용하는 이점이 크다. SVG는 해상도와 무관하게 선명하고(4K) 요소별 터치 처리가 쉽다. 게임 수준의 그래픽이 필요 없으므로 Phaser 같은 엔진은 과하다.
-**트레이드오프**: Vanilla+Canvas보다 번들이 크고 약한 SoC에서 다소 무겁다 → 드래그 중 React 렌더를 피하는 것으로 보완. CSS는 폴리필되지 않으므로 최신 CSS 기능을 쓰지 않는다.
+**트레이드오프**: Vanilla+Canvas보다 번들이 크고 약한 SoC에서 다소 무겁다 → 드래그 중 React 렌더를 피하는 것으로 보완. 쓸 수 있는 CSS·JS 범위는 ADR-006의 대상 브라우저(Chrome 99)로 정한다.
 
 ### ADR-003: GitHub Pages 배포
 **결정**: 공개 GitHub 저장소 + GitHub Actions로 GitHub Pages에 배포 (`paurrr.github.io/boardgame`).
@@ -33,3 +33,25 @@
 - 정답은 두 방식 모두 "목표 칸 전부 덮음 + 목표 밖 조각 칸 없음"이다.
 **이유**: 어린아이(쉬움)는 엉뚱한 자리에 놓여 헷갈리는 일이 없어야 하고, 큰 아이(보통·어려움)는 실물처럼 걸쳐 놓고 맞춰보는 재미가 있어야 한다.
 **트레이드오프**: 쉬움은 실물보다 약간 힌트가 된다(삐져나가는 배치를 시도할 수 없음). 보통·어려움은 여유 칸 때문에 판이 커져 같은 칸 너비에서 칸 크기가 작아진다.
+
+### ADR-006: 칠판 실측에 맞춘 빌드 대상 (Chrome 99), legacy 번들 제거
+**실측** (2026-10-14, 칠판에서 `check.html`):
+- 기기 LG 55TR3DK, Android 11, 내장 Chrome 99.0.4844 (WebView 아님)
+- 화면·뷰포트 1280×720 CSS px, `devicePixelRatio` 3 (실제 4K)
+- PointerEvent·전체화면 API·localStorage·WebAudio·ES 모듈·CSS 변수 모두 있음
+- `navigator.maxTouchPoints`는 1로 나오지만 실제 동시 터치는 17점까지 된다. 게임 안에서 4명이 동시에 끌어도 된다
+
+**결정**:
+- `@vitejs/plugin-legacy`(와 그 의존성 `terser`)를 빼고 `build.target`·`cssTarget`을 `chrome99`로 정한다. Vite 7 기본 대상(chrome107)이 칠판보다 새것이라 직접 정해야 한다.
+- 쓸 수 있는 CSS·JS를 Chrome 99 기준으로 넓힌다(CLAUDE.md). `tsconfig`의 lib을 ES2022로 두어 그 뒤 API를 타입 단계에서 막는다.
+- 최대 인원 4명은 그대로 둔다(동시 터치 17점).
+
+**이유**: Chrome 99는 모던 번들을 받으므로 legacy 번들은 칠판에서 쓰이지 않았다(Chrome 64 미만만 legacy를 받는다). 빼면 빌드가 단순해지고, 구형 가정 때문에 막아 둔 CSS(flexbox `gap` 등)를 쓸 수 있다.
+
+**트레이드오프**: Chrome 99보다 오래된 기기에서는 흰 화면이 나온다. 그때는 아래 순서로 되살린다.
+1. 그 기기에서 `/boardgame/check.html`을 열어 Chrome 버전을 확인한다(빌드를 거치지 않는 ES5라 어디서든 열린다).
+2. `npm i -D -E @vitejs/plugin-legacy@7.2.1 terser@5.51.2`
+3. `vite.config.ts`에 `legacy({ targets: ['chrome >= <버전>'] })`를 넣고 `build.target`은 지운다(plugin-legacy가 모던 번들 대상으로 덮어쓴다). `cssTarget`은 `chrome<버전>`으로 낮춘다. 지우기 직전 설정은 `git show 0cb6498:vite.config.ts`로 볼 수 있다.
+4. plugin-legacy는 CSS를 폴리필하지 않는다. 그 버전에서 안 되는 CSS를 margin 등으로 바꾼다. 예: flexbox `gap` 84+, `inset` 87+, `aspect-ratio`·`:is()/:where()` 88+.
+5. `tsconfig`의 lib과 CLAUDE.md의 CSS·JS 규칙을 그 버전에 맞춘다.
+6. `npm run build` 뒤 `dist/assets`에 `index-legacy-*.js`·`polyfills-legacy-*.js`가 생겼는지 확인한다.

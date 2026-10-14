@@ -6,7 +6,7 @@
 
 ## 1. 배경과 목표
 
-집에 있는 7~8년 된 LG 전자칠판에서 아이들과 보드게임을 하고 싶다. 칠판에는 Play Store가 없어 앱 설치가 어렵지만 인터넷과 웹 브라우저는 된다. 같은 시기 LG 전자칠판(TR3BF 계열)의 공개 사양은 Android 8.0 + 내장 Chrome, 4K(3840×2160), 최대 20점 멀티터치다. 실제 기기 사양은 진단 페이지로 확인한다(§7).
+집에 있는 7~8년 된 LG 전자칠판에서 아이들과 보드게임을 하고 싶다. 칠판에는 Play Store가 없어 앱 설치가 어렵지만 인터넷과 웹 브라우저는 된다. 같은 시기 LG 전자칠판(TR3BF 계열)의 공개 사양은 Android 8.0 + 내장 Chrome, 4K(3840×2160), 최대 20점 멀티터치다. 실제 기기 사양은 진단 페이지로 확인한다(§7). 2026-10-14 실측 결과 실제 기기는 55TR3DK, Android 11 + 내장 Chrome 99, 1280×720 CSS px @ DPR 3, 동시 터치 17점이었다(ADR-006).
 
 **목표**: 칠판 브라우저에서 주소만 열면 1~4명이 함께 즐길 수 있는 우봉고 스타일 퍼즐 게임을 만들고, 이후 다른 보드게임을 같은 앱에 계속 추가할 수 있는 구조를 갖춘다.
 
@@ -21,7 +21,7 @@
 | 항목 | 결정 |
 |---|---|
 | 플랫폼 | 웹 (정적 SPA, 서버 없음) |
-| 기술 | Vite + React + TypeScript, 게임 화면은 SVG, `@vitejs/plugin-legacy`로 구형 Chrome 호환 |
+| 기술 | Vite + React + TypeScript, 게임 화면은 SVG, 칠판 Chrome 99 대상 빌드(ADR-006) |
 | 배포 | GitHub Pages (공개 저장소) + GitHub Actions 자동 배포, 주소 `paurrr.github.io/boardgame` |
 | 인원 | 1~4인. 1인 = 타임어택, 2~4인 = 동시 대결 |
 | 난이도 | 플레이어마다 따로 선택 |
@@ -210,7 +210,7 @@ type GameModule = {
 - 드래그 중 위치는 매 프레임 React 상태로 올리지 않는다. 대상 요소의 `transform`을 직접 바꾸고, 놓을 때만 상태를 커밋한다. 약한 SoC를 고려한 것이다.
 
 ## 6. 호환성, 빌드, 배포
-- `@vitejs/plugin-legacy`로 모던 번들과 레거시 번들을 함께 만든다. targets는 진단 결과로 확정하며, 그 전에는 `chrome >= 61`로 가정한다.
+- 진단 결과(Chrome 99)에 맞춰 `build.target`·`cssTarget`을 `chrome99`로 정하고 모던 번들 하나만 만든다. 진단 전에는 `@vitejs/plugin-legacy`로 `chrome >= 61`용 번들도 만들었다. 더 오래된 기기가 필요하면 ADR-006의 복구 절차를 따른다.
 - `vite.config.ts`의 `base`는 `'/boardgame/'`이다.
 - `public/check.html`은 빌드를 거치지 않는 ES5 인라인 스크립트다. 앱 번들이 실패해도 진단은 열린다.
 - GitHub Actions에서 `main`에 push하면 lint, test, build를 거쳐 GitHub Pages에 배포한다.
@@ -224,7 +224,7 @@ type GameModule = {
 - 실시간 멀티터치 테스트: 손가락마다 색 원을 그리고 현재 동시 터치 수와 최대 기록을 표시
 - 지원 여부: PointerEvent, Fullscreen API(접두사 포함), localStorage, WebAudio, ES 모듈(`noModule` 지원)
 
-이 결과로 legacy targets와 4인 동시 플레이 가능 여부를 확정한다.
+이 결과로 legacy targets와 4인 동시 플레이 가능 여부를 확정한다. → 2026-10-14 확정: Chrome 99라 legacy 번들을 빼고, 동시 터치 17점이라 4인 그대로 간다(ADR-006). `maxTouchPoints`는 1로 잘못 보고되므로 실시간 터치 테스트 결과를 믿는다.
 
 ## 8. 테스트
 - **Vitest 단위 테스트(TDD)**:
@@ -254,7 +254,7 @@ type GameModule = {
 ## 11. 위험과 대응
 | 위험 | 대응 |
 |---|---|
-| 칠판 Chrome이 매우 구형 | legacy 번들로 대응한다. 그래도 안 되면 미니PC를 HDMI+USB 터치로 연결한다 |
-| 동시 터치 수가 사양보다 적음 | 진단 결과에 맞춰 최대 인원을 제한한다 |
+| 칠판 Chrome이 매우 구형 | 해소: 실측 Chrome 99(ADR-006). 다른 구형 기기는 ADR-006 복구 절차로 legacy 번들을 되살린다. 그래도 안 되면 미니PC를 HDMI+USB 터치로 연결한다 |
+| 동시 터치 수가 사양보다 적음 | 해소: 실측 17점, 4인 동시 플레이 확인 |
 | 4K 렌더링이 느림 | SVG 요소 수 최소화, 드래그 중 transform 직접 조작, 효과 최소화 |
 | 같은 난이도라도 퍼즐마다 체감 난이도가 다름 | 채움률 기준 선택으로 편차를 줄인다. 필요하면 이후 솔버 탐색량으로 난이도를 보정한다 |
