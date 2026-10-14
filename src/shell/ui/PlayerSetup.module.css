@@ -3,7 +3,8 @@
   flex-direction: column;
   height: 100%;
   box-sizing: border-box;
-  padding: 1.5rem 2rem;
+  /* 칠판 IR 터치는 화면 아래 가장자리에서 둔하다 */
+  padding: 1.5rem 2rem 2rem 2rem;
   overflow-y: auto;
   touch-action: pan-y;
 }
@@ -11,6 +12,23 @@
 .title {
   font-size: 2rem;
   margin: 0 0 1rem 0;
+}
+
+/* 두 열이 안 들어가는 좁은 화면에서는 오른쪽 열이 아래로 내려간다 */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 0 auto;
+}
+
+.who {
+  margin-right: 3rem;
+}
+
+.how {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
 }
 
 .row {
@@ -46,7 +64,7 @@
   background: var(--panel);
 }
 
-/* 시작 버튼은 아래쪽에 */
+/* 시작 버튼은 오른쪽 열 맨 아래에 */
 .actions {
   display: flex;
   justify-content: space-between;

@@ -33,80 +33,87 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
     <div className={styles.screen}>
       <h1 className={styles.title}>{`${game.name} · 누가 할까요?`}</h1>
 
-      <div className={styles.row} role="group" aria-label="인원">
-        <span className={styles.label}>인원</span>
-        {counts.map((n) => (
-          <button
-            key={n}
-            type="button"
-            className="btn"
-            aria-pressed={players.length === n}
-            onClick={() => setPlayers((prev) => resizePlayers(prev, n))}
-          >
-            {`${n}명`}
-          </button>
-        ))}
-      </div>
+      {/* 칠판(1280×720)에서 4명이어도 넘치지 않게 두 열: 왼쪽은 누가, 오른쪽은 어떻게 + 시작 */}
+      <div className={styles.columns}>
+        <div className={styles.who}>
+          <div className={styles.row} role="group" aria-label="인원">
+            <span className={styles.label}>인원</span>
+            {counts.map((n) => (
+              <button
+                key={n}
+                type="button"
+                className="btn"
+                aria-pressed={players.length === n}
+                onClick={() => setPlayers((prev) => resizePlayers(prev, n))}
+              >
+                {`${n}명`}
+              </button>
+            ))}
+          </div>
 
-      {players.map((p, i) => (
-        <div key={i} className={styles.row} role="group" aria-label={`${i + 1}번 플레이어`}>
-          <span className={styles.swatch} style={{ background: PLAYER_COLORS[i] }} />
-          <input
-            className={styles.name}
-            aria-label={`${i + 1}번 이름`}
-            value={p.name}
-            maxLength={MAX_NAME_LENGTH}
-            onChange={(e) => update(i, { name: e.target.value })}
-          />
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d}
-              type="button"
-              className="btn"
-              aria-pressed={p.difficulty === d}
-              onClick={() => update(i, { difficulty: d })}
-            >
-              {DIFFICULTY_LABEL[d]}
-            </button>
+          {players.map((p, i) => (
+            <div key={i} className={styles.row} role="group" aria-label={`${i + 1}번 플레이어`}>
+              <span className={styles.swatch} style={{ background: PLAYER_COLORS[i] }} />
+              <input
+                className={styles.name}
+                aria-label={`${i + 1}번 이름`}
+                value={p.name}
+                maxLength={MAX_NAME_LENGTH}
+                onChange={(e) => update(i, { name: e.target.value })}
+              />
+              {DIFFICULTIES.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className="btn"
+                  aria-pressed={p.difficulty === d}
+                  onClick={() => update(i, { difficulty: d })}
+                >
+                  {DIFFICULTY_LABEL[d]}
+                </button>
+              ))}
+            </div>
           ))}
         </div>
-      ))}
 
-      <div className={styles.row} role="group" aria-label="라운드">
-        <span className={styles.label}>라운드</span>
-        {ROUND_OPTIONS.map((r) => (
-          <button key={r} type="button" className="btn" aria-pressed={rounds === r} onClick={() => setRounds(r)}>
-            {`${r}판`}
-          </button>
-        ))}
-      </div>
+        <div className={styles.how}>
+          <div className={styles.row} role="group" aria-label="라운드">
+            <span className={styles.label}>라운드</span>
+            {ROUND_OPTIONS.map((r) => (
+              <button key={r} type="button" className="btn" aria-pressed={rounds === r} onClick={() => setRounds(r)}>
+                {`${r}판`}
+              </button>
+            ))}
+          </div>
 
-      <div className={styles.row} role="group" aria-label="제한시간">
-        <span className={styles.label}>시간</span>
-        {TIME_OPTIONS.map((t) => (
-          <button
-            key={t}
-            type="button"
-            className="btn"
-            aria-pressed={timeLimitSec === t}
-            onClick={() => setTimeLimitSec(t)}
-          >
-            {`${t}초`}
-          </button>
-        ))}
-      </div>
+          <div className={styles.row} role="group" aria-label="제한시간">
+            <span className={styles.label}>시간</span>
+            {TIME_OPTIONS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className="btn"
+                aria-pressed={timeLimitSec === t}
+                onClick={() => setTimeLimitSec(t)}
+              >
+                {`${t}초`}
+              </button>
+            ))}
+          </div>
 
-      <div className={styles.actions}>
-        <button type="button" className="btn" onClick={onBack}>
-          ← 메뉴
-        </button>
-        <button
-          type="button"
-          className={'btn btn-primary ' + styles.start}
-          onClick={() => onStart(finalizeSetup({ players, rounds, timeLimitSec }))}
-        >
-          시작!
-        </button>
+          <div className={styles.actions}>
+            <button type="button" className="btn" onClick={onBack}>
+              ← 메뉴
+            </button>
+            <button
+              type="button"
+              className={'btn btn-primary ' + styles.start}
+              onClick={() => onStart(finalizeSetup({ players, rounds, timeLimitSec }))}
+            >
+              시작!
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
