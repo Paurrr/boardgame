@@ -34,6 +34,7 @@ src/
 │       │   └── play.ts          # 칸 하나의 조각 상태 변화(놓기·돌리기·뒤집기)
 │       └── ui/
 │           ├── layout.ts        # SVG 안 판·버튼 줄·트레이 배치 계산
+│           ├── MenuIcon.tsx     # 메뉴 카드 그림 (GameModule.Icon)
 │           ├── PieceView.tsx    # 조각 하나
 │           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
 │           └── PlayerArea.module.css
@@ -60,6 +61,7 @@ src/
   type GameModule = {
     id: string; name: string; description: string; minPlayers: number; maxPlayers: number;
     PlayerArea: React.FC<{ difficulty: Difficulty; seed: number; active: boolean; onSolved: () => void }>;
+    Icon?: React.FC;  // 메뉴 카드에 곁들이는 작은 그림 (없어도 된다)
   };
   ```
   턴제 등 이 계약에 맞지 않는 게임은 그 게임을 추가할 때 셸을 확장한다.

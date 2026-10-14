@@ -25,20 +25,24 @@ type Props = {
 const URGENT_MS = 10000;
 const TICK_MS = 250;
 
-type HeaderProps = { state: MatchState; index: number; solo: boolean; newRecord: boolean };
+type HeaderProps = { state: MatchState; index: number; color: string; solo: boolean; newRecord: boolean };
 
-function PlayerHeader({ state, index, solo, newRecord }: HeaderProps) {
+function PlayerHeader({ state, index, color, solo, newRecord }: HeaderProps) {
   const player = state.config.players[index];
   const rank = state.solveOrder.indexOf(index);
   const time = state.solveTimesMs[index];
   let status = '시간 끝';
+  let done = false;
   if (state.phase === 'countdown') status = '준비!';
-  else if (rank >= 0 && time !== null) status = solo ? `완성! ${formatSeconds(time)}` : `완성! ${rank + 1}등 · ${formatSeconds(time)}`;
-  else if (state.phase === 'playing') status = '푸는 중';
+  else if (rank >= 0 && time !== null) {
+    status = solo ? `완성! ${formatSeconds(time)}` : `완성! ${rank + 1}등 · ${formatSeconds(time)}`;
+    done = true;
+  } else if (state.phase === 'playing') status = '푸는 중';
 
   return (
     <div>
       <div className={styles.nameLine}>
+        <span className={styles.chip} style={{ backgroundColor: color }} data-testid="player-chip" />
         <span className={styles.name}>{player.name}</span>
         <span className={styles.difficulty}>{DIFFICULTY_LABEL[player.difficulty]}</span>
       </div>
@@ -46,7 +50,7 @@ function PlayerHeader({ state, index, solo, newRecord }: HeaderProps) {
         {`${state.totals[index]}점`}
         {state.phase === 'roundResult' && <span className={styles.gain}>{` +${state.roundPoints[index]}`}</span>}
       </div>
-      <div className={styles.status}>{status}</div>
+      <div className={done ? styles.statusDone : styles.status}>{status}</div>
       {solo && newRecord && state.phase === 'roundResult' && <div className={styles.record}>새 기록!</div>}
     </div>
   );
@@ -140,7 +144,9 @@ export function Match({ game, config, seed, store, onExit, onReplay }: Props) {
           columns={config.players.map((p, i) => ({
             key: String(i),
             color: PLAYER_COLORS[i],
-            header: <PlayerHeader state={state} index={i} solo={solo} newRecord={newRecord} />,
+            header: (
+              <PlayerHeader state={state} index={i} color={PLAYER_COLORS[i]} solo={solo} newRecord={newRecord} />
+            ),
             body:
               state.phase === 'countdown' ? (
                 <div className={styles.countdown} data-testid="countdown">

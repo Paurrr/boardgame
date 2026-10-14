@@ -18,4 +18,6 @@ export type GameModule = {
   minPlayers: number;
   maxPlayers: number;
   PlayerArea: ComponentType<PlayerAreaProps>;
+  /** 메뉴 카드에 곁들이는 작은 그림 (없어도 된다) */
+  Icon?: ComponentType;
 };

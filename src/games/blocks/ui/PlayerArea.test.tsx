@@ -37,6 +37,15 @@ describe('PlayerArea', () => {
     expect(cellCount()).toBe(e.w * e.h);
   });
 
+  it('돌리기·뒤집기 버튼은 면 아래에 두께 블록을 깔아 도톰하게 보인다', () => {
+    render(<PlayerArea difficulty="normal" seed={7} active onSolved={noop} />);
+    for (const name of ['돌리기', '뒤집기']) {
+      const [depth, face] = screen.getByRole('button', { name }).querySelectorAll('rect');
+      expect(Number(depth.getAttribute('y'))).toBeGreaterThan(0);
+      expect(face.getAttribute('y')).toBeNull();
+    }
+  });
+
   it('쉬움에는 뒤집기 버튼이 없다', () => {
     render(<PlayerArea difficulty="easy" seed={7} active onSolved={noop} />);
     expect(screen.getByRole('button', { name: '돌리기' })).toBeInTheDocument();

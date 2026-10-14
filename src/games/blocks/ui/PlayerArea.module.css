@@ -28,34 +28,41 @@
 .silhouette {
   fill: none;
   stroke: var(--target-edge);
-  stroke-width: 0.14;
+  stroke-width: 0.16;
   stroke-linecap: square;
 }
 
 .silhouetteSolved {
   fill: none;
   stroke: var(--ok);
-  stroke-width: 0.22;
+  stroke-width: 0.26;
   stroke-linecap: square;
 }
 
 .pieceOutline {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 0.07;
+  stroke-width: 0.09;
   stroke-linecap: square;
 }
 
 .pieceOutlineSelected {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 0.16;
+  stroke-width: 0.18;
   stroke-linecap: square;
   stroke-dasharray: 0.3 0.12;
 }
 
-.action rect {
+/* 판 버튼도 나무 블록: 면 아래로 두께 블록이 비친다 */
+.action .actionDepth {
   fill: var(--ink);
+}
+
+.action .actionFace {
+  fill: var(--accent);
+  stroke: var(--ink);
+  stroke-width: 0.08;
 }
 
 .action text {
@@ -64,8 +71,14 @@
   font-weight: bold;
 }
 
-.actionDisabled rect {
-  fill: var(--grid-line);
+.actionDisabled .actionDepth {
+  fill: var(--off-edge);
+}
+
+.actionDisabled .actionFace {
+  fill: var(--off);
+  stroke: var(--off-edge);
+  stroke-width: 0.08;
 }
 
 .actionDisabled text {
@@ -79,6 +92,13 @@
   font-size: 1.6px;
   font-weight: bold;
   paint-order: stroke;
-  stroke: #ffffff;
+  stroke: var(--panel);
   stroke-width: 0.15px;
+}
+
+/* 메뉴 카드 그림 */
+.icon {
+  display: block;
+  width: 100%;
+  height: 100%;
 }

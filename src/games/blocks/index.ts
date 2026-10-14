@@ -1,4 +1,5 @@
 import type { GameModule } from '../types';
+import { MenuIcon } from './ui/MenuIcon';
 import { PlayerArea } from './ui/PlayerArea';
 
 export const blocksGame: GameModule = {
@@ -8,4 +9,5 @@ export const blocksGame: GameModule = {
   minPlayers: 1,
   maxPlayers: 4,
   PlayerArea,
+  Icon: MenuIcon,
 };

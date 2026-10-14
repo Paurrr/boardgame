@@ -1,9 +1,10 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GameModule, PlayerAreaProps } from '../../games/types';
 import { memoryStore } from '../../lib/storage';
 import type { MatchConfig } from '../logic/match';
 import { loadBestTimes } from '../logic/persistence';
+import { PLAYER_COLORS } from './colors';
 import { Match } from './Match';
 
 // 셸만 시험하려고 '풀기' 버튼 하나뿐인 가짜 게임을 쓴다
@@ -135,5 +136,20 @@ describe('Match', () => {
     expect(screen.getByText('새 기록!')).toBeInTheDocument();
     expect(columns()[0]).toHaveTextContent('완성! 12.3초');
     expect(loadBestTimes(store)).toEqual({ easy: 12300 });
+  });
+
+  it('칸 머리 이름 옆에 플레이어 색 블록이 있다', () => {
+    renderMatch(config(2));
+    const chips = screen.getAllByTestId('player-chip');
+    expect(chips).toHaveLength(2);
+    chips.forEach((c, i) => expect(c).toHaveStyle({ backgroundColor: PLAYER_COLORS[i] }));
+  });
+
+  it('푼 사람의 상태 글자만 완성 모양으로 바뀐다', () => {
+    renderMatch(config(2));
+    advance(3000);
+    fireEvent.click(solveButtons()[0]);
+    expect(within(columns()[0]).getByText(/완성!/).className).toMatch(/statusDone/);
+    expect(within(columns()[1]).getByText('푸는 중').className).not.toMatch(/statusDone/);
   });
 });

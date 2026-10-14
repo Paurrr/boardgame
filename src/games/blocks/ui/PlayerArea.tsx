@@ -20,6 +20,9 @@ import styles from './PlayerArea.module.css';
 const BUTTON_W = 3.6;
 const BUTTON_H = 1.4;
 const BUTTON_GAP = 0.6;
+/** 나무 블록처럼 면 아래로 비치는 두께 */
+const BUTTON_DEPTH = 0.24;
+const BUTTON_RADIUS = 0.32;
 
 const translate = (p: Point) => `translate(${p.x} ${p.y})`;
 
@@ -46,7 +49,8 @@ function ActionButton({ x, y, label, disabled, onPress }: ActionButtonProps) {
         if (!disabled) onPress();
       }}
     >
-      <rect width={BUTTON_W} height={BUTTON_H} rx={0.3} />
+      <rect y={BUTTON_DEPTH} width={BUTTON_W} height={BUTTON_H} rx={BUTTON_RADIUS} className={styles.actionDepth} />
+      <rect width={BUTTON_W} height={BUTTON_H} rx={BUTTON_RADIUS} className={styles.actionFace} />
       <text x={BUTTON_W / 2} y={BUTTON_H / 2} textAnchor="middle" dominantBaseline="central">
         {label}
       </text>

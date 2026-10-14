@@ -30,6 +30,8 @@
   width: 1.2rem;
   height: 3rem;
   margin: 0 0.6rem 0.5rem 0;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
   border-radius: 6px;
 }
 
@@ -40,7 +42,7 @@
   margin: 0 1rem 0.5rem 0;
   padding: 0 0.8rem;
   border: 3px solid var(--ink);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--panel);
 }
 

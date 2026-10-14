@@ -1,16 +1,21 @@
+/* docs/UI_GUIDE.md 색 — 나무 장난감 */
 :root {
-  --bg: #fff7ec;
-  --panel: #ffffff;
-  --ink: #2b2118;
-  --ink-soft: #6b5b4b;
-  --ink-faint: #a89a8a;
-  --target: #ede3d3;
-  --target-edge: #5b4a3a;
-  --margin-cell: #f7f0e4;
-  --grid-line: #d9ccb8;
-  --tray: #f3eadb;
-  --ok: #27ae60;
-  --warn: #e5483b;
+  --bg: #f2e4cc;
+  --panel: #fffaf0;
+  --bar: #e8d4b2;
+  --ink: #3b2a1a;
+  --ink-soft: #76604a;
+  --ink-faint: #b5a28a;
+  --accent: #c8461f;
+  --pressed: #f2b53a;
+  --off: #f3e9d8;
+  --off-edge: #c9b79c;
+  --target: #e6cfa8;
+  --target-edge: #3b2a1a;
+  --margin-cell: #f6eddd;
+  --grid-line: #d9c29e;
+  --ok: #2e9e55;
+  --warn: #d9442e;
 }
 
 html,
@@ -50,23 +55,33 @@ input {
   user-select: text;
 }
 
+/* 나무 블록: 그림자 대신 두꺼운 아래 테두리로 두께를 낸다 */
 .btn {
+  box-sizing: border-box;
   min-height: 3rem;
   padding: 0 1.2rem;
   margin: 0 0.5rem 0.5rem 0;
   border: 3px solid var(--ink);
-  border-radius: 12px;
+  border-bottom-width: 0.4rem;
+  border-radius: 14px;
   background: var(--panel);
   font-weight: bold;
 }
 
-.btn:active {
-  transform: translateY(2px);
+/* 눌림: 아래 두께가 0.25rem 얇아진 만큼 위 여백을 늘려 바닥은 제자리, 면만 내려간다 */
+.btn:active,
+.btn[aria-pressed='true'] {
+  margin-top: 0.25rem;
+  min-height: 2.75rem;
+  border-bottom-width: 0.15rem;
 }
 
-.btn[aria-pressed='true'],
+.btn[aria-pressed='true'] {
+  background: var(--pressed);
+}
+
 .btn-primary {
-  background: var(--ink);
+  background: var(--accent);
   color: #ffffff;
 }
 
