@@ -21,7 +21,9 @@
     {
       "step": 2,
       "name": "match-clock",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-21T23:16:09+0900",
+      "summary": "MatchState에 usedMs·totalTimesMs·solvedCounts 추가(createMatch에서 0, NEXT_ROUND에서 유지), roundBudgetMs(round: timeLimitSec*1000, game: max(0, gameTimeSec*1000-usedMs))·isLastRound(round>=rounds 또는 game에서 예산 0 이하) 추가, remainingMs를 예산 기준으로 통일, SOLVED는 경과가 예산 이상이면 무시, finishRound(state, durationMs)가 모두 풀면 최대 풀이 시간·TIME_UP이면 예산으로 usedMs·totalTimesMs·solvedCounts 누적(점수 계산은 그대로), NEXT_ROUND는 isLastRound면 final"
     },
     {
       "step": 3,

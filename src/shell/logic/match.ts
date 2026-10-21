@@ -34,6 +34,12 @@ export type MatchState = {
   /** 방금 끝난 라운드에서 얻은 점수 */
   roundPoints: number[];
   totals: number[];
+  /** 끝난 라운드 길이의 합(ms) — 판 전체 시계는 이것으로 계산한다 */
+  usedMs: number;
+  /** 끝난 라운드들에서 플레이어별로 쓴 시간의 합(ms): 푼 라운드는 푼 시간, 못 푼 라운드는 그 라운드 길이 */
+  totalTimesMs: number[];
+  /** 플레이어별로 푼 라운드 수 */
+  solvedCounts: number[];
 };
 
 export type MatchAction =
@@ -58,6 +64,9 @@ export function createMatch(config: MatchConfig, seed: number): MatchState {
     solveTimesMs: new Array<number | null>(n).fill(null),
     roundPoints: new Array<number>(n).fill(0),
     totals: new Array<number>(n).fill(0),
+    usedMs: 0,
+    totalTimesMs: new Array<number>(n).fill(0),
+    solvedCounts: new Array<number>(n).fill(0),
   };
 }
 
@@ -70,13 +79,27 @@ export function roundPoints(solveOrder: readonly number[], playerCount: number):
   return points;
 }
 
-function finishRound(state: MatchState): MatchState {
+/** 이번 라운드에 쓸 수 있는 최대 시간(ms). round: 라운드 제한시간, game: 남은 판 시간 */
+export function roundBudgetMs(state: MatchState): number {
+  if (state.config.timeMode === 'game') return Math.max(0, state.config.gameTimeSec * 1000 - state.usedMs);
+  return state.config.timeLimitSec * 1000;
+}
+
+/** 이번이 마지막 라운드인가: 라운드 수를 다 했거나, 판 전체 방식에서 판 시간이 다 됐다 */
+export function isLastRound(state: MatchState): boolean {
+  return state.round >= state.config.rounds || (state.config.timeMode === 'game' && roundBudgetMs(state) <= 0);
+}
+
+function finishRound(state: MatchState, durationMs: number): MatchState {
   const points = roundPoints(state.solveOrder, state.config.players.length);
   return {
     ...state,
     phase: 'roundResult',
     roundPoints: points,
     totals: state.totals.map((t, i) => t + points[i]),
+    usedMs: state.usedMs + durationMs,
+    totalTimesMs: state.totalTimesMs.map((t, i) => t + (state.solveTimesMs[i] ?? durationMs)),
+    solvedCounts: state.solvedCounts.map((c, i) => (state.solveTimesMs[i] === null ? c : c + 1)),
   };
 }
 
@@ -90,18 +113,22 @@ export function matchReducer(state: MatchState, action: MatchAction): MatchState
       if (state.phase !== 'playing' || state.roundStartedAt === null) return state;
       if (action.player < 0 || action.player >= state.config.players.length) return state;
       if (state.solveOrder.includes(action.player)) return state;
+      // 화면은 시간을 띄엄띄엄 확인하므로 시간이 끝난 뒤의 풀이가 TIME_UP보다 먼저 올 수 있다
+      const elapsed = action.now - state.roundStartedAt;
+      if (elapsed >= roundBudgetMs(state)) return state;
       const solveTimesMs = state.solveTimesMs.slice();
-      solveTimesMs[action.player] = action.now - state.roundStartedAt;
+      solveTimesMs[action.player] = elapsed;
       const next = { ...state, solveOrder: [...state.solveOrder, action.player], solveTimesMs };
-      return next.solveOrder.length === state.config.players.length ? finishRound(next) : next;
+      if (next.solveOrder.length < state.config.players.length) return next;
+      return finishRound(next, Math.max(...solveTimesMs.map((t) => t ?? 0)));
     }
 
     case 'TIME_UP':
-      return state.phase === 'playing' ? finishRound(state) : state;
+      return state.phase === 'playing' ? finishRound(state, roundBudgetMs(state)) : state;
 
     case 'NEXT_ROUND':
       if (state.phase !== 'roundResult') return state;
-      if (state.round >= state.config.rounds) return { ...state, phase: 'final' };
+      if (isLastRound(state)) return { ...state, phase: 'final' };
       return {
         ...state,
         phase: 'countdown',
@@ -114,11 +141,11 @@ export function matchReducer(state: MatchState, action: MatchAction): MatchState
   }
 }
 
-/** 남은 시간(ms). 플레이 중이 아니면 제한시간 전체, 0~제한시간 사이로 자른다 */
+/** 남은 시간(ms). 플레이 중이 아니면 라운드 예산 전체, 0~예산 사이로 자른다 */
 export function remainingMs(state: MatchState, now: number): number {
-  const limit = state.config.timeLimitSec * 1000;
-  if (state.phase !== 'playing' || state.roundStartedAt === null) return limit;
-  return Math.min(limit, Math.max(0, limit - (now - state.roundStartedAt)));
+  const budget = roundBudgetMs(state);
+  if (state.phase !== 'playing' || state.roundStartedAt === null) return budget;
+  return Math.min(budget, Math.max(0, budget - (now - state.roundStartedAt)));
 }
 
 export function playerSeed(state: MatchState, player: number): number {
