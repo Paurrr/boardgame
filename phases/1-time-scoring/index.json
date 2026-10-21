@@ -1,0 +1,45 @@
+{
+  "project": "우리집 보드게임",
+  "phase": "1-time-scoring",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-rules",
+      "status": "completed",
+      "summary": "ADR-007(빠르기 보너스·판 전체 타임어택·총 시간 동점 처리) 추가, PRD 핵심 기능 3 갱신, ARCHITECTURE 데이터 흐름을 실제 MatchAction(START_ROUND/SOLVED/TIME_UP/NEXT_ROUND)에 맞추고 판 시계(usedMs)·라운드 예산·standings 규칙 추가, 설계 문서 §3.5·§3.6에 변경 메모",
+      "started_at": "2026-10-21T23:10:58+0900",
+      "completed_at": "2026-10-21T23:12:57+0900"
+    },
+    {
+      "step": 1,
+      "name": "time-config",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "match-clock",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "speed-score",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "setup-ui",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "match-ui",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "final-result",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-21T23:10:58+0900"
+}
