@@ -47,7 +47,8 @@
       "name": "match-ui",
       "status": "completed",
       "started_at": "2026-10-21T23:22:40+0900",
-      "summary": "TopBar에 clockLabel?(시계 바로 앞 작은 글자 .clockLabel, --ink-soft) prop 추가하고 Match가 timeMode='game'이면 '판 전체'를 넘김, PlayerHeader는 roundResult에서 roundBonus>0이면 상태 줄 아래 '빠르기 +N'(.bonus: .status와 같은 1.2rem, --ok), 결과 막대 버튼은 isLastRound(state)로 '결과 보기'/'다음 라운드', 글자는 game 방식이고 roundBudgetMs<=0이면 '시간이 다 됐어요!' 아니면 '라운드 N 끝!', Match.test에 gameConfig 팩토리와 테스트 5건(판 전체 라벨·0:50 시작, 라운드마다 라벨 없음, 결과·카운트다운 동안 시계 멈춤 0:40→0:35, 판 시간 끝나면 결과 보기→최종 화면, 빠르기 +2 표시·41초는 없음) 추가 — 기존 테스트 그대로 통과"
+      "summary": "TopBar에 clockLabel?(시계 바로 앞 작은 글자 .clockLabel, --ink-soft) prop 추가하고 Match가 timeMode='game'이면 '판 전체'를 넘김, PlayerHeader는 roundResult에서 roundBonus>0이면 상태 줄 아래 '빠르기 +N'(.bonus: .status와 같은 1.2rem, --ok), 결과 막대 버튼은 isLastRound(state)로 '결과 보기'/'다음 라운드', 글자는 game 방식이고 roundBudgetMs<=0이면 '시간이 다 됐어요!' 아니면 '라운드 N 끝!', Match.test에 gameConfig 팩토리와 테스트 5건(판 전체 라벨·0:50 시작, 라운드마다 라벨 없음, 결과·카운트다운 동안 시계 멈춤 0:40→0:35, 판 시간 끝나면 결과 보기→최종 화면, 빠르기 +2 표시·41초는 없음) 추가 — 기존 테스트 그대로 통과",
+      "completed_at": "2026-10-21T23:25:15+0900"
     },
     {
       "step": 6,
