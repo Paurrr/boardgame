@@ -55,7 +55,8 @@
       "name": "final-result",
       "status": "completed",
       "summary": "FinalResult props를 players·standings·roundsPlayed·rounds로 바꾸고 정렬·우승 계산을 없앰(standings 순서 그대로, 제목은 winner 수로 '{이름} 우승!'/'공동 우승!', 혼자면 '다 했어요!'·우승 표시 없음), roundsPlayed<rounds면 제목 아래 .subtitle '시간이 다 됐어요 · N/M 라운드'(.head로 제목과 묶어 목록까지 간격 유지), 각 줄에 '총 {formatDuration}'·'{solved}/{roundsPlayed} 완성'(.meta 1.2rem·--ink-soft·nowrap·tabular-nums, 같은 줄), Match는 standings(state)·state.round·config.rounds를 넘김, 사용처가 없어진 winners()와 그 테스트 삭제, FinalResult.test 9건(기존 4개 의도 + 총 시간·완성 수, 점수 같고 시간으로 가린 단독 우승, 일찍 끝난 부제 유무, 혼자면 winner여도 우승 표시 없음) — 기존 테스트 그대로 통과, 1280×720 4명+부제 높이는 계산상 약 673px(측정 아님)",
-      "started_at": "2026-10-21T23:25:15+0900"
+      "started_at": "2026-10-21T23:25:15+0900",
+      "completed_at": "2026-10-21T23:28:41+0900"
     }
   ],
   "created_at": "2026-10-21T23:10:58+0900"
