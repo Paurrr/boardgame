@@ -20,6 +20,13 @@
   font-weight: bold;
 }
 
+.clockLabel {
+  margin: 0 0.5rem 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--ink-soft);
+}
+
 .clock {
   margin-bottom: 0.5rem;
   font-size: 2rem;
@@ -95,6 +102,12 @@
 }
 
 .statusDone {
+  margin-top: 0.3rem;
+  font-size: 1.2rem;
+  color: var(--ok);
+}
+
+.bonus {
   margin-top: 0.3rem;
   font-size: 1.2rem;
   color: var(--ok);

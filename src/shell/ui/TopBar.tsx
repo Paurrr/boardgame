@@ -6,6 +6,8 @@ type Props = {
   round: number;
   rounds: number;
   clock: string;
+  /** 시계 앞에 붙이는 작은 글자 (예: 판 전체) */
+  clockLabel?: string;
   urgent: boolean;
   muted: boolean;
   onToggleMute: () => void;
@@ -15,7 +17,7 @@ type Props = {
 const CONFIRM_MS = 3000;
 
 /** 어른이 쓰는 위쪽 막대. 그만하기는 아이가 실수로 누르지 않게 두 번 눌러야 한다 */
-export function TopBar({ round, rounds, clock, urgent, muted, onToggleMute, onExit }: Props) {
+export function TopBar({ round, rounds, clock, clockLabel, urgent, muted, onToggleMute, onExit }: Props) {
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export function TopBar({ round, rounds, clock, urgent, muted, onToggleMute, onEx
   return (
     <header className={styles.topBar}>
       <span className={styles.round}>{`라운드 ${round}/${rounds}`}</span>
+      {clockLabel && <span className={styles.clockLabel}>{clockLabel}</span>}
       <span className={urgent ? styles.clockUrgent : styles.clock} data-testid="clock">
         {clock}
       </span>

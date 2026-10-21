@@ -4,7 +4,15 @@ import { DIFFICULTY_LABEL } from '../../lib/difficulty';
 import { isMuted, setMuted, sounds } from '../../lib/sound';
 import type { KeyValueStore } from '../../lib/storage';
 import { formatClock, formatSeconds } from '../logic/format';
-import { COUNTDOWN_SECONDS, createMatch, matchReducer, playerSeed, remainingMs } from '../logic/match';
+import {
+  COUNTDOWN_SECONDS,
+  createMatch,
+  isLastRound,
+  matchReducer,
+  playerSeed,
+  remainingMs,
+  roundBudgetMs,
+} from '../logic/match';
 import type { MatchConfig, MatchState } from '../logic/match';
 import { recordBestTime } from '../logic/persistence';
 import { PLAYER_COLORS } from './colors';
@@ -51,6 +59,9 @@ function PlayerHeader({ state, index, color, solo, newRecord }: HeaderProps) {
         {state.phase === 'roundResult' && <span className={styles.gain}>{` +${state.roundPoints[index]}`}</span>}
       </div>
       <div className={done ? styles.statusDone : styles.status}>{status}</div>
+      {state.phase === 'roundResult' && state.roundBonus[index] > 0 && (
+        <div className={styles.bonus}>{`빠르기 +${state.roundBonus[index]}`}</div>
+      )}
       {solo && newRecord && state.phase === 'roundResult' && <div className={styles.record}>새 기록!</div>}
     </div>
   );
@@ -134,6 +145,7 @@ export function Match({ game, config, seed, store, onExit, onReplay }: Props) {
         round={state.round}
         rounds={config.rounds}
         clock={formatClock(remaining)}
+        clockLabel={config.timeMode === 'game' ? '판 전체' : undefined}
         urgent={state.phase === 'playing' && remaining <= URGENT_MS}
         muted={muted}
         onToggleMute={toggleMute}
@@ -166,9 +178,11 @@ export function Match({ game, config, seed, store, onExit, onReplay }: Props) {
       </div>
       {state.phase === 'roundResult' && (
         <div className={styles.resultBar}>
-          <span className={styles.resultText}>{`라운드 ${state.round} 끝!`}</span>
+          <span className={styles.resultText}>
+            {config.timeMode === 'game' && roundBudgetMs(state) <= 0 ? '시간이 다 됐어요!' : `라운드 ${state.round} 끝!`}
+          </span>
           <button type="button" className="btn btn-primary" onClick={() => dispatch({ type: 'NEXT_ROUND' })}>
-            {state.round >= config.rounds ? '결과 보기' : '다음 라운드'}
+            {isLastRound(state) ? '결과 보기' : '다음 라운드'}
           </button>
         </div>
       )}

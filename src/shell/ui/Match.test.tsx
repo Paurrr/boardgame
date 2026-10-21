@@ -36,6 +36,12 @@ const config = (players: number, rounds = 2, timeLimitSec = 60): MatchConfig => 
   gameTimeSec: 300,
 });
 
+const gameConfig = (players: number, rounds = 3, gameTimeSec = 50): MatchConfig => ({
+  ...config(players, rounds),
+  timeMode: 'game',
+  gameTimeSec,
+});
+
 function renderMatch(c: MatchConfig) {
   const onExit = vi.fn();
   const onReplay = vi.fn();
@@ -153,5 +159,58 @@ describe('Match', () => {
     fireEvent.click(solveButtons()[0]);
     expect(within(columns()[0]).getByText(/완성!/).className).toMatch(/statusDone/);
     expect(within(columns()[1]).getByText('푸는 중').className).not.toMatch(/statusDone/);
+  });
+
+  it('판 전체 방식이면 시계 앞에 판 전체라고 적고 판 전체 시간에서 시작한다', () => {
+    renderMatch(gameConfig(2));
+    advance(3000);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:50');
+    expect(screen.getByTestId('clock').previousElementSibling).toHaveTextContent('판 전체');
+  });
+
+  it('라운드마다 방식에는 판 전체 글자가 없다', () => {
+    renderMatch(config(2));
+    advance(3000);
+    expect(screen.queryByText('판 전체')).toBeNull();
+  });
+
+  it('판 전체 시계는 라운드 결과와 카운트다운 동안 멈춘다', () => {
+    renderMatch(gameConfig(2));
+    advance(3000);
+    advance(10000);
+    fireEvent.click(solveButtons()[0]);
+    fireEvent.click(solveButtons()[1]);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:40');
+    advance(5000);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:40');
+    fireEvent.click(screen.getByRole('button', { name: '다음 라운드' }));
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:40');
+    advance(2000);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:40');
+    advance(1000);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:40');
+    advance(5000);
+    expect(screen.getByTestId('clock')).toHaveTextContent('0:35');
+  });
+
+  it('판 시간이 다 되면 남은 라운드가 있어도 결과 보기로 간다', () => {
+    renderMatch(gameConfig(2, 3, 50));
+    advance(3000);
+    advance(50000);
+    expect(screen.getByText('시간이 다 됐어요!')).toBeInTheDocument();
+    expect(screen.queryByText('라운드 1 끝!')).toBeNull();
+    expect(screen.queryByRole('button', { name: '다음 라운드' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
+    expect(screen.getByRole('heading')).toBeInTheDocument();
+  });
+
+  it('빠르기 보너스를 받은 사람만 칸 머리에 빠르기 +N을 보여준다', () => {
+    renderMatch(config(2, 2, 60));
+    advance(3000);
+    fireEvent.click(solveButtons()[0]);
+    advance(41000);
+    fireEvent.click(solveButtons()[1]);
+    expect(columns()[0]).toHaveTextContent('빠르기 +2');
+    expect(columns()[1]).not.toHaveTextContent('빠르기');
   });
 });
