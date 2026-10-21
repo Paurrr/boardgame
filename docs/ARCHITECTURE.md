@@ -72,14 +72,17 @@ src/
 ```
 PlayerSetup ─(MatchConfig)→ matchReducer ─(라운드·시드·active)→ PlayLayout
                                   ↑                                  │
-                       SOLVED(playerIndex, time)          PlayerArea × N (각 칸 독립)
-                       TICK / TIME_UP / NEXT_ROUND  ←── onSolved() ──┘
-matchReducer ─(roundPoints, 총점)→ RoundResult / FinalResult
+                       START_ROUND / SOLVED(player, now)  PlayerArea × N (각 칸 독립)
+                       TIME_UP / NEXT_ROUND  ←───────── onSolved() ──┘
+matchReducer ─(roundPoints, 총점)→ 라운드 결과(Match 안) / FinalResult
 ```
 
 ## 상태 관리
 - 판 진행(단계·라운드·해결 순서·점수)은 `shell/logic`의 순수 reducer + `useReducer`.
 - 남은 시간은 라운드 시작 시각 기준으로 계산하고 화면 갱신 주기에 맞춰 표시한다.
+- 판 시계는 끝난 라운드 길이의 합(`usedMs`)으로 계산한다. 카운트다운과 라운드 결과 동안에는 더하지 않으므로 시계가 멈춘다.
+- 이번 라운드에 쓸 수 있는 시간(라운드 예산)은 라운드마다 방식이면 제한시간, 판 전체 방식이면 남은 판 시간이다(ADR-007).
+- 최종 순위는 `shell/logic`의 순수 함수 `standings`가 총점, 그다음 총 걸린 시간으로 정한다.
 - 각 칸의 퍼즐 상태(조각 위치·방향)는 `PlayerArea` 내부 상태. 드래그 중 좌표는 상태로 올리지 않고 SVG 요소의 `transform`을 직접 갱신, 놓을 때만 커밋한다.
 - 판 밖에 둔 자리와 그리는 순서는 규칙과 무관한 화면 상태라 `PlayerArea`에만 둔다. logic의 `PieceState.at`은 판 밖이면 `null`일 뿐이다.
 - 영속 데이터는 `localStorage`만 사용 (마지막 설정, 1인 최고기록). 접근은 try/catch로 감싸고 실패해도 동작해야 한다.
