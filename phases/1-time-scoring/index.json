@@ -15,7 +15,8 @@
       "name": "time-config",
       "status": "completed",
       "summary": "TimeMode('round'|'game')와 MatchConfig·SavedSetup의 timeMode·gameTimeSec 추가, setup.ts에 GAME_TIME_MIN_SEC/MAX_SEC/STEP_SEC·DEFAULT_GAME_TIME_SEC(300)와 clampGameTime·stepGameTime, defaultSetup·toMatchConfig가 새 필드를 채워 넘김, loadSetup은 같은 키(v1)에서 예전 저장값을 'round'·300초로 채우고 잘못된 timeMode·숫자 아닌 gameTimeSec는 null, 숫자는 clampGameTime으로 정리, PlayerSetup은 ...initial로 새 필드 유지",
-      "started_at": "2026-10-21T23:12:57+0900"
+      "started_at": "2026-10-21T23:12:57+0900",
+      "completed_at": "2026-10-21T23:16:09+0900"
     },
     {
       "step": 2,
