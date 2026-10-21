@@ -44,7 +44,9 @@ describe('PlayerSetup', () => {
         { name: '플레이어 2', difficulty: 'hard' },
       ],
       rounds: 3,
+      timeMode: 'round',
       timeLimitSec: 60,
+      gameTimeSec: 300,
     });
   });
 

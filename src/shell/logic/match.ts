@@ -3,11 +3,18 @@ import { deriveSeed } from '../../lib/random';
 
 export type PlayerConfig = { name: string; difficulty: Difficulty };
 
+/** round: 라운드마다 제한시간, game: 판 전체 제한시간(타임어택) */
+export type TimeMode = 'round' | 'game';
+
 export type MatchConfig = {
   gameId: string;
   players: PlayerConfig[];
   rounds: number;
+  timeMode: TimeMode;
+  /** 라운드마다 방식의 라운드 제한시간(초) — 뜻은 기존 그대로 */
   timeLimitSec: number;
+  /** 판 전체 방식의 전체 제한시간(초) */
+  gameTimeSec: number;
 };
 
 export type Phase = 'countdown' | 'playing' | 'roundResult' | 'final';

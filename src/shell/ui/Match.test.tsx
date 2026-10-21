@@ -31,7 +31,9 @@ const config = (players: number, rounds = 2, timeLimitSec = 60): MatchConfig => 
   gameId: 'stub',
   players: NAMES.slice(0, players).map((name) => ({ name, difficulty: 'normal' as const })),
   rounds,
+  timeMode: 'round',
   timeLimitSec,
+  gameTimeSec: 300,
 });
 
 function renderMatch(c: MatchConfig) {

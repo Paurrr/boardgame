@@ -38,6 +38,26 @@ describe('setup 저장', () => {
     expect(loadSetup(store)).toEqual(setup);
   });
 
+  it('판 전체 방식 설정도 그대로 불러온다', () => {
+    const store = memoryStore();
+    const setup = { ...defaultSetup(), timeMode: 'game' as const, gameTimeSec: 50 };
+    saveSetup(store, setup);
+    expect(loadSetup(store)).toEqual(setup);
+  });
+
+  it('시간 방식이 없던 예전 저장값은 라운드마다, 판 전체 300초로 채운다', () => {
+    const store = memoryStore();
+    const { players } = defaultSetup();
+    store.setItem(SETUP_KEY, JSON.stringify({ players, rounds: 5, timeLimitSec: 90 }));
+    expect(loadSetup(store)).toEqual({ players, rounds: 5, timeMode: 'round', timeLimitSec: 90, gameTimeSec: 300 });
+  });
+
+  it('판 전체 시간은 10초 단위로 정리한다', () => {
+    const store = memoryStore();
+    store.setItem(SETUP_KEY, JSON.stringify({ ...defaultSetup(), gameTimeSec: 47 }));
+    expect(loadSetup(store)?.gameTimeSec).toBe(50);
+  });
+
   it('저장된 게 없으면 null', () => {
     expect(loadSetup(memoryStore())).toBeNull();
   });
@@ -51,6 +71,8 @@ describe('setup 저장', () => {
     ['이름이 문자열이 아님', JSON.stringify({ ...defaultSetup(), players: [{ name: 3, difficulty: 'easy' }] })],
     ['없는 라운드 수', JSON.stringify({ ...defaultSetup(), rounds: 4 })],
     ['없는 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: 30 })],
+    ['모르는 시간 방식', JSON.stringify({ ...defaultSetup(), timeMode: 'fast' })],
+    ['판 전체 시간이 숫자가 아님', JSON.stringify({ ...defaultSetup(), gameTimeSec: '50' })],
   ])('%s이면 null', (_name, raw) => {
     const store = memoryStore();
     store.setItem(SETUP_KEY, raw);

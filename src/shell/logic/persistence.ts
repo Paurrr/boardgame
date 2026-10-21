@@ -3,7 +3,7 @@ import type { Difficulty } from '../../lib/difficulty';
 import type { KeyValueStore } from '../../lib/storage';
 import type { PlayerConfig } from './match';
 import { ROUND_OPTIONS, TIME_OPTIONS } from './match';
-import { MAX_NAME_LENGTH } from './setup';
+import { clampGameTime, DEFAULT_GAME_TIME_SEC, MAX_NAME_LENGTH } from './setup';
 import type { SavedSetup } from './setup';
 
 const SETUP_KEY = 'boardgame.setup.v1';
@@ -36,7 +36,7 @@ function writeJson(store: KeyValueStore, key: string, value: unknown): void {
 export function loadSetup(store: KeyValueStore): SavedSetup | null {
   const data = readJson(store, SETUP_KEY);
   if (!isRecord(data)) return null;
-  const { players, rounds, timeLimitSec } = data;
+  const { players, rounds, timeMode = 'round', timeLimitSec, gameTimeSec = DEFAULT_GAME_TIME_SEC } = data;
   if (!Array.isArray(players) || players.length < 1 || players.length > 4) return null;
   const parsed: PlayerConfig[] = [];
   for (const p of players) {
@@ -45,7 +45,10 @@ export function loadSetup(store: KeyValueStore): SavedSetup | null {
   }
   if (typeof rounds !== 'number' || !ROUND_OPTIONS.includes(rounds)) return null;
   if (typeof timeLimitSec !== 'number' || !TIME_OPTIONS.includes(timeLimitSec)) return null;
-  return { players: parsed, rounds, timeLimitSec };
+  // 시간 방식·판 전체 시간은 나중에 생긴 값이라 예전 저장값에는 없다 (없으면 기본값)
+  if (timeMode !== 'round' && timeMode !== 'game') return null;
+  if (typeof gameTimeSec !== 'number') return null;
+  return { players: parsed, rounds, timeMode, timeLimitSec, gameTimeSec: clampGameTime(gameTimeSec) };
 }
 
 export function saveSetup(store: KeyValueStore, setup: SavedSetup): void {

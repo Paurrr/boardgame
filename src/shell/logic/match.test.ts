@@ -6,7 +6,9 @@ const config = (players: number, rounds = 3): MatchConfig => ({
   gameId: 'blocks',
   players: Array.from({ length: players }, (_, i) => ({ name: `P${i + 1}`, difficulty: 'normal' as const })),
   rounds,
+  timeMode: 'round',
   timeLimitSec: 90,
+  gameTimeSec: 300,
 });
 
 const playing = (players: number, rounds = 3, now = 1000): MatchState =>

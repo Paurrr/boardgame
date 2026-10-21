@@ -1,9 +1,32 @@
-import type { MatchConfig, PlayerConfig } from './match';
+import type { MatchConfig, PlayerConfig, TimeMode } from './match';
 
 /** 플레이어 설정 화면에서 고르는 값 (저장해 두고 다음에 다시 쓴다) */
-export type SavedSetup = { players: PlayerConfig[]; rounds: number; timeLimitSec: number };
+export type SavedSetup = {
+  players: PlayerConfig[];
+  rounds: number;
+  timeMode: TimeMode;
+  timeLimitSec: number;
+  gameTimeSec: number;
+};
 
 export const MAX_NAME_LENGTH = 8;
+
+export const GAME_TIME_MIN_SEC = 30;
+export const GAME_TIME_MAX_SEC = 600;
+export const GAME_TIME_STEP_SEC = 10;
+export const DEFAULT_GAME_TIME_SEC = 300;
+
+/** 10초 단위로 반올림하고 30~600으로 자른다. 숫자가 아니거나 유한하지 않으면 기본값 */
+export function clampGameTime(sec: number): number {
+  if (!Number.isFinite(sec)) return DEFAULT_GAME_TIME_SEC;
+  const rounded = Math.round(sec / GAME_TIME_STEP_SEC) * GAME_TIME_STEP_SEC;
+  return Math.min(GAME_TIME_MAX_SEC, Math.max(GAME_TIME_MIN_SEC, rounded));
+}
+
+/** 10초 늘리거나 줄인다 (범위 밖으로 나가지 않는다) */
+export function stepGameTime(sec: number, dir: 1 | -1): number {
+  return clampGameTime(sec + dir * GAME_TIME_STEP_SEC);
+}
 
 export function defaultName(index: number): string {
   return '플레이어 ' + (index + 1);
@@ -16,7 +39,9 @@ export function defaultSetup(): SavedSetup {
       { name: defaultName(1), difficulty: 'normal' },
     ],
     rounds: 5,
+    timeMode: 'round',
     timeLimitSec: 90,
+    gameTimeSec: DEFAULT_GAME_TIME_SEC,
   };
 }
 
@@ -39,5 +64,12 @@ export function finalizeSetup(setup: SavedSetup): SavedSetup {
 }
 
 export function toMatchConfig(gameId: string, setup: SavedSetup): MatchConfig {
-  return { gameId, players: setup.players, rounds: setup.rounds, timeLimitSec: setup.timeLimitSec };
+  return {
+    gameId,
+    players: setup.players,
+    rounds: setup.rounds,
+    timeMode: setup.timeMode,
+    timeLimitSec: setup.timeLimitSec,
+    gameTimeSec: setup.gameTimeSec,
+  };
 }

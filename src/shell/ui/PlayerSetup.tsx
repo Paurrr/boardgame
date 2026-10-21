@@ -108,7 +108,7 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
             <button
               type="button"
               className={'btn btn-primary ' + styles.start}
-              onClick={() => onStart(finalizeSetup({ players, rounds, timeLimitSec }))}
+              onClick={() => onStart(finalizeSetup({ ...initial, players, rounds, timeLimitSec }))}
             >
               시작!
             </button>
