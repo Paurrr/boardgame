@@ -64,6 +64,60 @@ describe('PlayerSetup', () => {
     expect(nameInputs()).toHaveLength(2);
   });
 
+  it('처음에는 라운드마다 방식이고 제한시간 줄만 보인다', () => {
+    renderSetup();
+    expect(screen.getByRole('button', { name: '라운드마다' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: '판 전체' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('group', { name: '제한시간' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: '판 전체 시간' })).toBeNull();
+  });
+
+  it('판 전체를 고르면 판 전체 시간 줄이 제한시간 줄을 대신한다', () => {
+    renderSetup();
+    fireEvent.click(screen.getByRole('button', { name: '판 전체' }));
+    expect(screen.getByRole('button', { name: '판 전체' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('group', { name: '판 전체 시간' })).toBeInTheDocument();
+    expect(screen.getByTestId('game-time')).toHaveTextContent('5:00');
+    expect(screen.queryByRole('group', { name: '제한시간' })).toBeNull();
+  });
+
+  it('판 전체 시간을 10초씩 늘리고 줄인다', () => {
+    renderSetup();
+    fireEvent.click(screen.getByRole('button', { name: '판 전체' }));
+    fireEvent.click(screen.getByRole('button', { name: '10초 늘리기' }));
+    expect(screen.getByTestId('game-time')).toHaveTextContent('5:10');
+    fireEvent.click(screen.getByRole('button', { name: '10초 줄이기' }));
+    fireEvent.click(screen.getByRole('button', { name: '10초 줄이기' }));
+    expect(screen.getByTestId('game-time')).toHaveTextContent('4:50');
+  });
+
+  it('저장된 판 전체 설정을 복원하고 최솟값에서는 줄이기를 막는다', () => {
+    renderSetup(blocksGame, { ...defaultSetup(), timeMode: 'game', gameTimeSec: 30 });
+    expect(screen.getByRole('button', { name: '판 전체' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('game-time')).toHaveTextContent('0:30');
+    expect(screen.getByRole('button', { name: '10초 줄이기' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '10초 늘리기' })).toBeEnabled();
+  });
+
+  it('최댓값에서는 늘리기를 막는다', () => {
+    renderSetup(blocksGame, { ...defaultSetup(), timeMode: 'game', gameTimeSec: 600 });
+    expect(screen.getByTestId('game-time')).toHaveTextContent('10:00');
+    expect(screen.getByRole('button', { name: '10초 늘리기' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '10초 줄이기' })).toBeEnabled();
+  });
+
+  it('판 전체 방식으로 시작하면 라운드 제한시간도 그대로 함께 넘긴다', () => {
+    const { onStart } = renderSetup();
+    fireEvent.click(screen.getByRole('button', { name: '판 전체' }));
+    for (let i = 0; i < 25; i++) fireEvent.click(screen.getByRole('button', { name: '10초 줄이기' }));
+    expect(screen.getByTestId('game-time')).toHaveTextContent('0:50');
+    fireEvent.click(screen.getByRole('button', { name: '시작!' }));
+    const setup = onStart.mock.calls[0][0];
+    expect(setup.timeMode).toBe('game');
+    expect(setup.gameTimeSec).toBe(50);
+    expect(setup.timeLimitSec).toBe(90);
+  });
+
   it('메뉴 버튼은 onBack', () => {
     const { onBack } = renderSetup();
     fireEvent.click(screen.getByRole('button', { name: '← 메뉴' }));

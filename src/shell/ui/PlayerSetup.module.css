@@ -64,6 +64,15 @@
   background: var(--panel);
 }
 
+/* 판 전체 시간 값: 버튼 사이에서 숫자가 바뀌어도 폭이 흔들리지 않게 */
+.gameTime {
+  min-width: 4rem;
+  margin: 0 0.5rem 0.5rem 0;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
 /* 시작 버튼은 오른쪽 열 맨 아래에 */
 .actions {
   display: flex;

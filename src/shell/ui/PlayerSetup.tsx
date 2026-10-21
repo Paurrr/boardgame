@@ -2,8 +2,16 @@ import { useState } from 'react';
 import type { GameModule } from '../../games/types';
 import { DIFFICULTIES, DIFFICULTY_LABEL } from '../../lib/difficulty';
 import { ROUND_OPTIONS, TIME_OPTIONS } from '../logic/match';
-import type { PlayerConfig } from '../logic/match';
-import { finalizeSetup, MAX_NAME_LENGTH, resizePlayers } from '../logic/setup';
+import type { PlayerConfig, TimeMode } from '../logic/match';
+import { formatClock } from '../logic/format';
+import {
+  finalizeSetup,
+  GAME_TIME_MAX_SEC,
+  GAME_TIME_MIN_SEC,
+  MAX_NAME_LENGTH,
+  resizePlayers,
+  stepGameTime,
+} from '../logic/setup';
 import type { SavedSetup } from '../logic/setup';
 import { PLAYER_COLORS } from './colors';
 import styles from './PlayerSetup.module.css';
@@ -21,7 +29,9 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
     return resizePlayers(initial.players, count);
   });
   const [rounds, setRounds] = useState(initial.rounds);
+  const [timeMode, setTimeMode] = useState<TimeMode>(initial.timeMode);
   const [timeLimitSec, setTimeLimitSec] = useState(initial.timeLimitSec);
+  const [gameTimeSec, setGameTimeSec] = useState(initial.gameTimeSec);
 
   const counts: number[] = [];
   for (let n = game.minPlayers; n <= game.maxPlayers; n++) counts.push(n);
@@ -86,20 +96,67 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
             ))}
           </div>
 
-          <div className={styles.row} role="group" aria-label="제한시간">
+          <div className={styles.row} role="group" aria-label="시간 방식">
             <span className={styles.label}>시간</span>
-            {TIME_OPTIONS.map((t) => (
+            <button
+              type="button"
+              className="btn"
+              aria-pressed={timeMode === 'round'}
+              onClick={() => setTimeMode('round')}
+            >
+              라운드마다
+            </button>
+            <button
+              type="button"
+              className="btn"
+              aria-pressed={timeMode === 'game'}
+              onClick={() => setTimeMode('game')}
+            >
+              판 전체
+            </button>
+          </div>
+
+          {timeMode === 'round' ? (
+            <div className={styles.row} role="group" aria-label="제한시간">
+              <span className={styles.label}>제한</span>
+              {TIME_OPTIONS.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className="btn"
+                  aria-pressed={timeLimitSec === t}
+                  onClick={() => setTimeLimitSec(t)}
+                >
+                  {`${t}초`}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.row} role="group" aria-label="판 전체 시간">
+              <span className={styles.label}>전체</span>
               <button
-                key={t}
                 type="button"
                 className="btn"
-                aria-pressed={timeLimitSec === t}
-                onClick={() => setTimeLimitSec(t)}
+                aria-label="10초 줄이기"
+                disabled={gameTimeSec <= GAME_TIME_MIN_SEC}
+                onClick={() => setGameTimeSec((sec) => stepGameTime(sec, -1))}
               >
-                {`${t}초`}
+                −10초
               </button>
-            ))}
-          </div>
+              <span className={styles.gameTime} data-testid="game-time">
+                {formatClock(gameTimeSec * 1000)}
+              </span>
+              <button
+                type="button"
+                className="btn"
+                aria-label="10초 늘리기"
+                disabled={gameTimeSec >= GAME_TIME_MAX_SEC}
+                onClick={() => setGameTimeSec((sec) => stepGameTime(sec, 1))}
+              >
+                +10초
+              </button>
+            </div>
+          )}
 
           <div className={styles.actions}>
             <button type="button" className="btn" onClick={onBack}>
@@ -108,7 +165,7 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
             <button
               type="button"
               className={'btn btn-primary ' + styles.start}
-              onClick={() => onStart(finalizeSetup({ ...initial, players, rounds, timeLimitSec }))}
+              onClick={() => onStart(finalizeSetup({ players, rounds, timeMode, timeLimitSec, gameTimeSec }))}
             >
               시작!
             </button>

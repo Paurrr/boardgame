@@ -37,7 +37,9 @@
     {
       "step": 4,
       "name": "setup-ui",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-21T23:20:24+0900",
+      "summary": "PlayerSetup에 timeMode·gameTimeSec 상태(initial에서 복원) 추가, 오른쪽 열을 라운드 → role=group aria-label='시간 방식'(라벨 '시간', '라운드마다'/'판 전체' aria-pressed) → 방식별 한 줄(round: aria-label='제한시간' 라벨 '제한' 60/90/120초, game: aria-label='판 전체 시간' 라벨 '전체', '−10초'(aria-label='10초 줄이기', GAME_TIME_MIN_SEC면 disabled)·data-testid='game-time' formatClock 값·'+10초'(aria-label='10초 늘리기', GAME_TIME_MAX_SEC면 disabled), stepGameTime으로 변경) → 메뉴·시작 순으로 배치, 시작은 finalizeSetup({ players, rounds, timeMode, timeLimitSec, gameTimeSec })로 두 방식 값을 함께 넘김(...initial 제거), CSS에 .gameTime(굵게·tabular-nums·min-width 4rem·가운데, 색 없음) 추가, 테스트 6건 추가 — 기존 테스트 그대로 통과"
     },
     {
       "step": 5,
