@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "speed-score",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-21T23:18:09+0900",
+      "summary": "match.ts에 speedBaseMs(round: timeLimitSec*1000, game: gameTimeSec*1000/rounds)·speedBonus(3t<=base → 2, 3t<=2base → 1, 그 외 0)·Standing 타입·standings(총점 내림차순 → Math.round(timeMs/100) 오름차순 → 플레이어 번호, 1등과 총점·0.1초 시간이 같으면 winner) 추가, MatchState.roundBonus(createMatch·NEXT_ROUND에서 0) 추가, finishRound가 roundPoints=순위+보너스·roundBonus=보너스로 totals에 합산(roundPoints()·winners()는 그대로), format.ts에 formatDuration('45.2초'/'1분 02.3초', 0.1초 반올림 뒤 분·초), 보너스 때문에 기존 기대값만 갱신(match.test 4건, Match.test '5점 +5'/'4점 +4') — 그 밖에 깨진 테스트 없음"
     },
     {
       "step": 4,

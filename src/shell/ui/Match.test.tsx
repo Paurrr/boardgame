@@ -85,9 +85,9 @@ describe('Match', () => {
     fireEvent.click(solveButtons()[1]);
     fireEvent.click(solveButtons()[0]);
     expect(screen.getByText('라운드 1 끝!')).toBeInTheDocument();
-    expect(columns()[1]).toHaveTextContent('3점 +3');
+    expect(columns()[1]).toHaveTextContent('5점 +5');
     expect(columns()[1]).toHaveTextContent('완성! 1등');
-    expect(columns()[0]).toHaveTextContent('2점 +2');
+    expect(columns()[0]).toHaveTextContent('4점 +4');
   });
 
   it('시간이 다 되면 못 푼 사람은 0점으로 라운드가 끝난다', () => {

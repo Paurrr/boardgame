@@ -7,6 +7,9 @@ import {
   remainingMs,
   roundBudgetMs,
   roundPoints,
+  speedBaseMs,
+  speedBonus,
+  standings,
   winners,
 } from './match';
 import type { MatchConfig, MatchState } from './match';
@@ -57,6 +60,10 @@ describe('createMatch', () => {
     expect(s.totalTimesMs).toEqual([0, 0, 0]);
     expect(s.solvedCounts).toEqual([0, 0, 0]);
   });
+
+  it('빠르기 보너스는 0에서 시작한다', () => {
+    expect(createMatch(config(3), 7).roundBonus).toEqual([0, 0, 0]);
+  });
 });
 
 describe('matchReducer', () => {
@@ -96,15 +103,15 @@ describe('matchReducer', () => {
     s = matchReducer(s, { type: 'SOLVED', player: 0, now: 3000 });
     s = matchReducer(s, { type: 'SOLVED', player: 1, now: 4000 });
     expect(s.phase).toBe('roundResult');
-    expect(s.roundPoints).toEqual([2, 1, 3]);
-    expect(s.totals).toEqual([2, 1, 3]);
+    expect(s.roundPoints).toEqual([4, 3, 5]);
+    expect(s.totals).toEqual([4, 3, 5]);
   });
 
   it('TIME_UP: 못 푼 사람은 0점으로 라운드를 끝낸다', () => {
     let s = matchReducer(playing(3), { type: 'SOLVED', player: 1, now: 2000 });
     s = matchReducer(s, { type: 'TIME_UP' });
     expect(s.phase).toBe('roundResult');
-    expect(s.roundPoints).toEqual([0, 3, 0]);
+    expect(s.roundPoints).toEqual([0, 5, 0]);
   });
 
   it('TIME_UP은 플레이 중이 아니면 무시한다', () => {
@@ -115,7 +122,7 @@ describe('matchReducer', () => {
   it('혼자 하면 풀자마자 라운드가 끝난다', () => {
     const s = matchReducer(playing(1), { type: 'SOLVED', player: 0, now: 4000 });
     expect(s.phase).toBe('roundResult');
-    expect(s.totals).toEqual([3]);
+    expect(s.totals).toEqual([5]);
   });
 
   it('NEXT_ROUND: 다음 라운드 카운트다운으로 가며 라운드 기록을 비운다', () => {
@@ -147,7 +154,7 @@ describe('matchReducer', () => {
     s = matchReducer(s, { type: 'START_ROUND', now: 100 });
     s = matchReducer(s, { type: 'SOLVED', player: 1, now: 200 });
     s = matchReducer(s, { type: 'SOLVED', player: 0, now: 300 });
-    expect(s.totals).toEqual([5, 3]);
+    expect(s.totals).toEqual([9, 5]);
   });
 });
 
@@ -263,6 +270,102 @@ describe('isLastRound', () => {
       s = matchReducer(s, { type: 'START_ROUND', now: 0 });
     }
     expect(seen).toEqual([false, false, true]);
+  });
+});
+
+describe('speedBaseMs', () => {
+  it('라운드마다 방식은 라운드 제한시간', () => {
+    expect(speedBaseMs(config(2))).toBe(90000);
+  });
+
+  it('판 전체 방식은 판 전체 시간 ÷ 라운드 수', () => {
+    expect(speedBaseMs(gameConfig(2, 5, 50))).toBe(10000);
+  });
+});
+
+describe('speedBonus', () => {
+  it('기준의 1/3 이내 2점, 2/3 이내 1점, 그 뒤 0점 (경계 포함)', () => {
+    expect(speedBonus(0, 90000)).toBe(2);
+    expect(speedBonus(30000, 90000)).toBe(2);
+    expect(speedBonus(30001, 90000)).toBe(1);
+    expect(speedBonus(60000, 90000)).toBe(1);
+    expect(speedBonus(60001, 90000)).toBe(0);
+    expect(speedBonus(90000, 90000)).toBe(0);
+  });
+});
+
+describe('라운드 점수 = 순위 점수 + 빠르기 보너스', () => {
+  it('빨리 푼 1등은 3+2, 늦게 푼 2등은 2+0', () => {
+    let s = playing(2, 3, 0);
+    s = matchReducer(s, { type: 'SOLVED', player: 0, now: 10000 });
+    s = matchReducer(s, { type: 'SOLVED', player: 1, now: 70000 });
+    expect(s.roundPoints).toEqual([5, 2]);
+    expect(s.roundBonus).toEqual([2, 0]);
+    expect(s.totals).toEqual([5, 2]);
+  });
+
+  it('판 전체 방식은 판 전체 시간 ÷ 라운드 수를 기준으로 한다', () => {
+    let s = gamePlaying(1, 3, 60, 0);
+    s = matchReducer(s, { type: 'SOLVED', player: 0, now: 7000 });
+    expect(s.roundBonus).toEqual([1]);
+    expect(s.roundPoints).toEqual([4]);
+    expect(s.totals).toEqual([4]);
+  });
+
+  it('못 푼 사람은 보너스도 0', () => {
+    let s = matchReducer(playing(2, 3, 0), { type: 'SOLVED', player: 1, now: 1000 });
+    s = matchReducer(s, { type: 'TIME_UP' });
+    expect(s.roundBonus).toEqual([0, 2]);
+    expect(s.roundPoints).toEqual([0, 5]);
+  });
+
+  it('NEXT_ROUND 뒤 빠르기 보너스는 0으로 돌아간다', () => {
+    let s = matchReducer(playing(2, 3, 0), { type: 'SOLVED', player: 0, now: 1000 });
+    s = matchReducer(s, { type: 'TIME_UP' });
+    expect(s.roundBonus).toEqual([2, 0]);
+    s = matchReducer(s, { type: 'NEXT_ROUND' });
+    expect(s.roundBonus).toEqual([0, 0]);
+  });
+});
+
+describe('standings', () => {
+  const finished = (totals: number[], totalTimesMs: number[], solvedCounts: number[]): MatchState => ({
+    ...createMatch(config(totals.length), 1),
+    totals,
+    totalTimesMs,
+    solvedCounts,
+  });
+
+  it('총점 내림차순으로 줄 세우고 1등만 우승', () => {
+    const rows = standings(finished([5, 9, 3], [30000, 50000, 20000], [2, 3, 1]));
+    expect(rows.map((r) => r.player)).toEqual([1, 0, 2]);
+    expect(rows.map((r) => r.winner)).toEqual([true, false, false]);
+  });
+
+  it('총점이 같으면 총 걸린 시간이 짧은 쪽이 앞이고 그 사람만 우승', () => {
+    const rows = standings(finished([7, 7, 3], [20000, 15000, 5000], [2, 2, 1]));
+    expect(rows.map((r) => r.player)).toEqual([1, 0, 2]);
+    expect(rows.map((r) => r.winner)).toEqual([true, false, false]);
+  });
+
+  it('총점과 0.1초 단위 시간이 같으면 플레이어 번호 순이고 둘 다 우승', () => {
+    const rows = standings(finished([7, 7, 3], [12340, 12310, 5000], [2, 2, 1]));
+    expect(rows.map((r) => r.player)).toEqual([0, 1, 2]);
+    expect(rows.map((r) => r.winner)).toEqual([true, true, false]);
+  });
+
+  it('각 줄에 총점·총 걸린 시간·푼 라운드 수를 담는다', () => {
+    const rows = standings(finished([5, 9], [30000, 50000], [2, 3]));
+    expect(rows).toEqual([
+      { player: 1, total: 9, timeMs: 50000, solved: 3, winner: true },
+      { player: 0, total: 5, timeMs: 30000, solved: 2, winner: false },
+    ]);
+  });
+
+  it('상태 배열을 바꾸지 않는다', () => {
+    const s = finished([3, 9], [1000, 2000], [1, 2]);
+    standings(s);
+    expect(s.totals).toEqual([3, 9]);
   });
 });
 

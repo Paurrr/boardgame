@@ -31,8 +31,10 @@ export type MatchState = {
   solveOrder: number[];
   /** 이번 라운드 플레이어별 걸린 시간(ms), 못 풀었으면 null */
   solveTimesMs: (number | null)[];
-  /** 방금 끝난 라운드에서 얻은 점수 */
+  /** 방금 끝난 라운드에서 얻은 점수 (순위 점수 + 빠르기 보너스) */
   roundPoints: number[];
+  /** 방금 끝난 라운드의 빠르기 보너스 */
+  roundBonus: number[];
   totals: number[];
   /** 끝난 라운드 길이의 합(ms) — 판 전체 시계는 이것으로 계산한다 */
   usedMs: number;
@@ -63,6 +65,7 @@ export function createMatch(config: MatchConfig, seed: number): MatchState {
     solveOrder: [],
     solveTimesMs: new Array<number | null>(n).fill(null),
     roundPoints: new Array<number>(n).fill(0),
+    roundBonus: new Array<number>(n).fill(0),
     totals: new Array<number>(n).fill(0),
     usedMs: 0,
     totalTimesMs: new Array<number>(n).fill(0),
@@ -79,6 +82,19 @@ export function roundPoints(solveOrder: readonly number[], playerCount: number):
   return points;
 }
 
+/** 빠르기 보너스 기준 시간(ms): round → timeLimitSec*1000, game → gameTimeSec*1000/rounds */
+export function speedBaseMs(config: MatchConfig): number {
+  if (config.timeMode === 'game') return (config.gameTimeSec * 1000) / config.rounds;
+  return config.timeLimitSec * 1000;
+}
+
+/** 기준의 1/3 이내 2점, 2/3 이내 1점, 그 뒤 0점 (경계 포함). 경계에서 흔들리지 않게 곱셈으로 비교한다 */
+export function speedBonus(timeMs: number, baseMs: number): number {
+  if (3 * timeMs <= baseMs) return 2;
+  if (3 * timeMs <= 2 * baseMs) return 1;
+  return 0;
+}
+
 /** 이번 라운드에 쓸 수 있는 최대 시간(ms). round: 라운드 제한시간, game: 남은 판 시간 */
 export function roundBudgetMs(state: MatchState): number {
   if (state.config.timeMode === 'game') return Math.max(0, state.config.gameTimeSec * 1000 - state.usedMs);
@@ -91,11 +107,15 @@ export function isLastRound(state: MatchState): boolean {
 }
 
 function finishRound(state: MatchState, durationMs: number): MatchState {
-  const points = roundPoints(state.solveOrder, state.config.players.length);
+  const rank = roundPoints(state.solveOrder, state.config.players.length);
+  const base = speedBaseMs(state.config);
+  const bonus = state.solveTimesMs.map((t) => (t === null ? 0 : speedBonus(t, base)));
+  const points = rank.map((r, i) => r + bonus[i]);
   return {
     ...state,
     phase: 'roundResult',
     roundPoints: points,
+    roundBonus: bonus,
     totals: state.totals.map((t, i) => t + points[i]),
     usedMs: state.usedMs + durationMs,
     totalTimesMs: state.totalTimesMs.map((t, i) => t + (state.solveTimesMs[i] ?? durationMs)),
@@ -137,6 +157,7 @@ export function matchReducer(state: MatchState, action: MatchAction): MatchState
         solveOrder: [],
         solveTimesMs: state.solveTimesMs.map(() => null),
         roundPoints: state.roundPoints.map(() => 0),
+        roundBonus: state.roundBonus.map(() => 0),
       };
   }
 }
@@ -160,4 +181,34 @@ export function winners(totals: readonly number[]): number[] {
     if (t === best) out.push(i);
   });
   return out;
+}
+
+export type Standing = {
+  /** 플레이어 번호 */
+  player: number;
+  /** 총점 */
+  total: number;
+  /** 총 걸린 시간(ms) */
+  timeMs: number;
+  /** 푼 라운드 수 */
+  solved: number;
+  /** 1등과 총점·시간(0.1초 단위)이 모두 같으면 공동 우승 */
+  winner: boolean;
+};
+
+/** 최종 순위표. 총점 내림차순 → 총 걸린 시간(0.1초 단위) 오름차순 → 플레이어 번호 오름차순 */
+export function standings(state: MatchState): Standing[] {
+  const tenths = (ms: number) => Math.round(ms / 100);
+  const rows = state.totals.map((total, player) => ({
+    player,
+    total,
+    timeMs: state.totalTimesMs[player],
+    solved: state.solvedCounts[player],
+  }));
+  rows.sort((a, b) => b.total - a.total || tenths(a.timeMs) - tenths(b.timeMs) || a.player - b.player);
+  const first = rows[0];
+  return rows.map((r) => ({
+    ...r,
+    winner: r.total === first.total && tenths(r.timeMs) === tenths(first.timeMs),
+  }));
 }
