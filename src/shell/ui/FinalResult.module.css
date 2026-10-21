@@ -6,9 +6,21 @@
   padding: 2rem;
 }
 
+/* 부제가 있어도 없어도 목록까지 간격이 같게 제목·부제를 묶는다 */
+.head {
+  margin-bottom: 1.5rem;
+}
+
 .title {
-  margin: 0 0 1.5rem 0;
+  margin: 0;
   font-size: 3rem;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--ink-soft);
 }
 
 .list {
@@ -38,6 +50,15 @@
 .total {
   margin-left: 1rem;
   font-weight: bold;
+}
+
+/* 총 시간·완성 수: 같은 줄에 작게 — 줄 높이는 이름·점수가 정한다 */
+.meta {
+  margin-left: 1.2rem;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ink-soft);
 }
 
 .crown {

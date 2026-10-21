@@ -10,7 +10,6 @@ import {
   speedBaseMs,
   speedBonus,
   standings,
-  winners,
 } from './match';
 import type { MatchConfig, MatchState } from './match';
 
@@ -366,13 +365,6 @@ describe('standings', () => {
     const s = finished([3, 9], [1000, 2000], [1, 2]);
     standings(s);
     expect(s.totals).toEqual([3, 9]);
-  });
-});
-
-describe('winners', () => {
-  it('최고점인 사람들 (동점이면 여럿)', () => {
-    expect(winners([5, 9, 3])).toEqual([1]);
-    expect(winners([7, 2, 7])).toEqual([0, 2]);
   });
 });
 

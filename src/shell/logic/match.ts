@@ -173,16 +173,6 @@ export function playerSeed(state: MatchState, player: number): number {
   return deriveSeed(state.seed, state.round, player);
 }
 
-/** 최고점인 플레이어 번호들 (동점이면 공동 우승) */
-export function winners(totals: readonly number[]): number[] {
-  const best = Math.max(...totals);
-  const out: number[] = [];
-  totals.forEach((t, i) => {
-    if (t === best) out.push(i);
-  });
-  return out;
-}
-
 export type Standing = {
   /** 플레이어 번호 */
   player: number;

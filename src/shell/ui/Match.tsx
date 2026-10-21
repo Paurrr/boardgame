@@ -12,6 +12,7 @@ import {
   playerSeed,
   remainingMs,
   roundBudgetMs,
+  standings,
 } from '../logic/match';
 import type { MatchConfig, MatchState } from '../logic/match';
 import { recordBestTime } from '../logic/persistence';
@@ -131,7 +132,16 @@ export function Match({ game, config, seed, store, onExit, onReplay }: Props) {
   }, [soloTime, store, config.players]);
 
   if (state.phase === 'final') {
-    return <FinalResult players={config.players} totals={state.totals} onReplay={onReplay} onExit={onExit} />;
+    return (
+      <FinalResult
+        players={config.players}
+        standings={standings(state)}
+        roundsPlayed={state.round}
+        rounds={config.rounds}
+        onReplay={onReplay}
+        onExit={onExit}
+      />
+    );
   }
 
   const toggleMute = () => {
