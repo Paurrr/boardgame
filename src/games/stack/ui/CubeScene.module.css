@@ -1,0 +1,42 @@
+/* 좌표는 판 단위 (정육면체 한 칸 = 1) */
+
+/* 정육면체 한 면 */
+.face {
+  stroke: var(--ink);
+  stroke-width: 0.035;
+  stroke-linejoin: round;
+}
+
+/* 고른 조각 */
+.selected {
+  stroke-width: 0.1;
+}
+
+/* 끄는 조각이 떨어질 자리 (판에 붙은 모습) */
+.preview {
+  fill-opacity: 0.85;
+  stroke-opacity: 0.8;
+  pointer-events: none;
+}
+
+/* 아직 채우지 않은 목표 칸 */
+.ghost {
+  fill: var(--target);
+  fill-opacity: 0.4;
+  stroke: var(--ink-soft);
+  stroke-width: 0.025;
+  stroke-linejoin: round;
+  stroke-dasharray: 0.1 0.07;
+  pointer-events: none;
+}
+
+/* 면 색 위에 덮는 음영. 진하기는 면마다 fill-opacity로 준다 (docs/UI_GUIDE.md 쌓기 퍼즐) */
+.shade {
+  fill: var(--ink);
+  pointer-events: none;
+}
+
+/* 떨어질 자리를 가리는 정육면체 */
+.xray {
+  opacity: 0.25;
+}
