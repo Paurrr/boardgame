@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "stack-logic",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-24T21:06:48+0900",
+      "summary": "src/games/stack/logic에 types.ts(Vec3·Cell2·StackPieceId·Area·Placed·Puzzle·MAX_H=2), pieces.ts(STACK_PIECES — 평면 7종은 1탄 PIECES cells에 z=0, Y4/R4/Q4 색은 P5/L5/U5에서 import, STACK_IDS·PLANAR_IDS), rotate.ts(key3, normalize는 최소 0·(z,y,x) 정렬·-0 제거, rotZ, rotateAbout(k×v+(k·v)k), orientations(cells, zOnly)는 rotZ+x축 BFS로 첫째가 원래 모양, heightOf·sizeOf·centerOf는 정규화 cells 기준), board.ts(dropZ 기둥별 최고 높이, landing 높이 제한·inside는 target 안·free는 바운딩박스 안, canLift는 같은 기둥에서 내 가장 낮은 칸보다 높은 남의 칸이 있으면 false이고 판에 없는 id는 true, isSolved는 겹침 없이 집합 일치, footprintOf 처음 나온 순서) + 테스트 49개(방향 수 표 10종 포함)"
     },
     {
       "step": 4,
