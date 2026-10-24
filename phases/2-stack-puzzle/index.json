@@ -23,7 +23,8 @@
       "name": "shell-records-hidden",
       "status": "completed",
       "started_at": "2026-10-24T21:04:11+0900",
-      "summary": "GameModule.hidden? 추가, src/lib/devMode.ts의 isDevMode(search)(URLSearchParams.has('dev')), registry.ts에 menuGames(games, search)(숨긴 게임은 ?dev일 때만), persistence의 loadBestTimes(store, gameId)·recordBestTime(store, gameId, difficulty, ms)는 키 boardgame.${gameId}.best.v1이라 블록 퍼즐 기록은 옮기지 않고 그대로 읽음, Match는 game.id로 기록, GameMenu는 menuGames(GAMES, window.location.search)를 그림"
+      "summary": "GameModule.hidden? 추가, src/lib/devMode.ts의 isDevMode(search)(URLSearchParams.has('dev')), registry.ts에 menuGames(games, search)(숨긴 게임은 ?dev일 때만), persistence의 loadBestTimes(store, gameId)·recordBestTime(store, gameId, difficulty, ms)는 키 boardgame.${gameId}.best.v1이라 블록 퍼즐 기록은 옮기지 않고 그대로 읽음, Match는 game.id로 기록, GameMenu는 menuGames(GAMES, window.location.search)를 그림",
+      "completed_at": "2026-10-24T21:06:48+0900"
     },
     {
       "step": 3,
