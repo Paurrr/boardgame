@@ -19,6 +19,20 @@ describe('registry', () => {
   it('없는 id는 undefined', () => {
     expect(findGame('nope')).toBeUndefined();
   });
+
+  it('쌓기 퍼즐은 1~4인, 제한시간 90/120/150초(기본 120초)로 등록돼 있다', () => {
+    const game = findGame('stack');
+    expect(game?.name).toBe('쌓기 퍼즐');
+    expect(game?.minPlayers).toBe(1);
+    expect(game?.maxPlayers).toBe(4);
+    expect(game?.timeOptions).toEqual([90, 120, 150]);
+    expect(game?.defaultTimeSec).toBe(120);
+  });
+
+  it('쌓기 퍼즐은 칠판 확인 중이라 ?dev 없이는 메뉴에 없다', () => {
+    expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('stack');
+    expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('stack');
+  });
 });
 
 describe('menuGames', () => {

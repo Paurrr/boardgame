@@ -69,7 +69,9 @@
     {
       "step": 8,
       "name": "stack-play",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-24T21:37:43+0900",
+      "summary": "src/games/stack/ui/PlayerArea.tsx(memo PlayerArea: 시점 상태 {az: AZ0, el: EL0}·setter는 Task 9, 판 바닥 다각형(floor-target --target/floor-margin --margin-cell, --grid-line)과 1탄 outlineSegments로 그린 실루엣(silhouette, 풀면 silhouetteSolved --ok), 판 장면 하나의 CubeScene(data-testid board-scene: 미리보기 preview-{id} + 판 위 조각 group 'board' + 안 채운 target 빈칸), 트레이·판 밖·끄는 조각은 order 순서로 조각마다 <g data-testid=stack-piece data-piece data-state=tray|loose|board data-cells=key3 join(' ')>이고 판 위면 빈 그룹(transform만), 기준 자리 baseOf: 판 위 boardScreen(at) 배율 1 / 판 밖 loose 중심·트레이 슬롯 중심 − project(centerOf)×TRAY_SCALE, 누를 때 clientToSvg(layout, 칸 div 사각형)로 잡은 점을 Grab{start, local}로 기억해 끄는 중 1배로 손가락 아래에 둠, 한 조각은 첫 손가락만(held pointerId 맵), 끄는 중 transform 직접 갱신 + 떨어질 자리·판 걸침 key가 바뀔 때만 hover 상태(놓을 수 있음 floatHidden+미리보기 / 판 윤곽 안인데 못 놓음 floatBlocked 0.5 / 판 밖 보통), 놓기: landingNear 자리 → board, 판 걸침 → at null(loose 있으면 거기, 없으면 트레이), 판 밖 → looseSpot(traySize: 조각 상자 8꼭짓점 투영×0.6), active false나 pointercancel(dx=dy=0)이면 원래 자리, 톡=rotZ, 버튼(1탄 ActionButton 모양, pointerdown, 높이 layout.buttonH, 글자 buttonH×0.43, 고른 조각 없으면 aria-disabled)은 마지막에 만진 조각에 돌리기 rotZ·눕히기 rotateAbout(tipAxis(cam)), 쉬움은 눕히기 없음, 판 위 조각은 canLift일 때만 잡기·돌리기(못 들면 stopPropagation 안 함 → Task 9 판 돌리기), 돌리면 바닥 중심을 Math.trunc로 유지해 landing, 안 맞으면 판 밖 마지막 자리(looseSpot 재맞춤)·없으면 트레이, 판 밖 조각은 돌린 뒤 looseSpot 재맞춤, 풀면 onSolved 1회 + 완성!) + PlayerArea.module.css + src/games/stack/index.ts(stackGame: id stack, 쌓기 퍼즐, 1~4인, timeOptions 90/120/150, 기본 120, hidden) + registry GAMES=[blocksGame, stackGame] + 테스트 PlayerArea 18개(316×440 칸 흉내, Review Focus 2·3·5, 두 손가락, 미리보기/흐림, 쉬움 완성)·registry 2개. 손 확인 보류(자동 세션에 브라우저 없음)"
     },
     {
       "step": 9,

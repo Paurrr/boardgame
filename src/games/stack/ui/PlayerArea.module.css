@@ -1,0 +1,98 @@
+/* 좌표는 판 단위 (정육면체 한 칸 = 1) */
+
+.box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* 판 바닥: 목표 바닥 칸 / 바운딩박스의 나머지 칸 */
+.floorTarget {
+  fill: var(--target);
+  stroke: var(--grid-line);
+  stroke-width: 0.03;
+  stroke-linejoin: round;
+}
+
+.floorMargin {
+  fill: var(--margin-cell);
+  stroke: var(--grid-line);
+  stroke-width: 0.03;
+  stroke-linejoin: round;
+}
+
+.silhouette {
+  fill: none;
+  stroke: var(--target-edge);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.silhouetteSolved {
+  fill: none;
+  stroke: var(--ok);
+  stroke-width: 0.2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* 끄는 중 판에 붙은 모습(미리보기)이 보일 때 손에 든 조각 */
+.floatHidden {
+  visibility: hidden;
+}
+
+/* 끄는 중 판에 걸쳤지만 놓을 수 없을 때 */
+.floatBlocked {
+  opacity: 0.5;
+}
+
+/* 판 버튼도 나무 블록: 면 아래로 두께 블록이 비친다 (1탄과 같은 모양) */
+.action .actionDepth {
+  fill: var(--ink);
+}
+
+.action .actionFace {
+  fill: var(--accent);
+  stroke: var(--ink);
+  stroke-width: 0.08;
+}
+
+.action text {
+  fill: var(--on-accent);
+  font-weight: bold;
+}
+
+.actionDisabled .actionDepth {
+  fill: var(--off-edge);
+}
+
+.actionDisabled .actionFace {
+  fill: var(--off);
+  stroke: var(--off-edge);
+  stroke-width: 0.08;
+}
+
+.actionDisabled text {
+  fill: var(--ink-faint);
+  font-weight: bold;
+}
+
+.solvedText {
+  fill: var(--ok);
+  font-size: 1.6px;
+  font-weight: bold;
+  paint-order: stroke;
+  stroke: var(--panel);
+  stroke-width: 0.15px;
+  pointer-events: none;
+}
