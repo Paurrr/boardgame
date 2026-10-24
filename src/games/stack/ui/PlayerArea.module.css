@@ -87,6 +87,17 @@
   font-weight: bold;
 }
 
+/* 개발용(?dev) 초당 프레임 수: 칸 오른쪽 위 작은 글자 */
+.fps {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.4rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
 .solvedText {
   fill: var(--ok);
   font-size: 1.6px;
