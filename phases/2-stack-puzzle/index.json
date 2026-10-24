@@ -40,7 +40,7 @@
       "status": "completed",
       "started_at": "2026-10-24T21:12:32+0900",
       "summary": "src/games/stack/logic/solver.ts(solveStack: (z,y,x) 첫 빈칸 백트래킹·cells[0] 기준점·높이 ≤ 2 방향·rng면 조각/방향 순서 섞음, permutations, buildable: 어떤 순서든 dropZ로 지어짐), generator.ts(generatePuzzle, EASY_MAX_SIDE 3·FULL_MAX_SIDE 4·EASY_MIN_UPPER 2·EASY_TRIES 300·FULL_TRIES 20000, 쉬움 상한은 내부 EASY_GIVE_UP 4000, 보통·어려움은 홀수 합도 시도로 세고 이웃 수² 가중 바닥(중복 후보 없음)→solveStack→buildable, 쉬움은 평면 2개 떨어뜨려 채움률 최고, 바닥 최소 (0,0)으로 이동, 쉬움 처음 방향 rotZ^int(4), 1탄 shape.ts의 isConnected·neighbors·shapeSize 재사용, 높이 ≤ 2 방향 캐시) + 테스트 45개(난이도별 시드 200개 속성·시도 상한 throw). 200개 생성 쉬움 ~0.3s·어려움 ~0.35s, 서로 다른 퍼즐 132/145/188종",
-      "completed_at": "2026-10-24T21:18:21+0900"
+      "completed_at": "2026-10-24T21:19:03+0900"
     },
     {
       "step": 5,
