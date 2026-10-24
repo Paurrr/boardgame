@@ -24,4 +24,6 @@ export type GameModule = {
   defaultTimeSec?: number;
   /** 메뉴 카드에 곁들이는 작은 그림 (없어도 된다) */
   Icon?: ComponentType;
+  /** true면 주소에 ?dev가 있을 때만 메뉴에 보인다 (칠판 확인 중인 게임) */
+  hidden?: boolean;
 };

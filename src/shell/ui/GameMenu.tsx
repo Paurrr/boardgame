@@ -1,4 +1,4 @@
-import { GAMES } from '../../games/registry';
+import { GAMES, menuGames } from '../../games/registry';
 import type { GameModule } from '../../games/types';
 import { PLAYER_COLORS } from './colors';
 import styles from './GameMenu.module.css';
@@ -15,7 +15,7 @@ export function GameMenu({ onSelect }: Props) {
       </div>
       <h1 className={styles.title}>우리집 보드게임</h1>
       <div className={styles.list}>
-        {GAMES.map((g) => {
+        {menuGames(GAMES, window.location.search).map((g) => {
           const { Icon } = g;
           return (
             <button key={g.id} type="button" className={styles.card} onClick={() => onSelect(g)}>

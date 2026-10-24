@@ -98,40 +98,55 @@ describe('setup 저장', () => {
 describe('최고기록', () => {
   it('처음 기록은 새 기록', () => {
     const store = memoryStore();
-    expect(recordBestTime(store, 'easy', 12000)).toBe(true);
-    expect(loadBestTimes(store)).toEqual({ easy: 12000 });
+    expect(recordBestTime(store, 'blocks', 'easy', 12000)).toBe(true);
+    expect(loadBestTimes(store, 'blocks')).toEqual({ easy: 12000 });
   });
 
   it('더 느리면 새 기록이 아니고, 더 빠르면 새 기록', () => {
     const store = memoryStore();
-    recordBestTime(store, 'normal', 20000);
-    expect(recordBestTime(store, 'normal', 25000)).toBe(false);
-    expect(recordBestTime(store, 'normal', 15000)).toBe(true);
-    expect(loadBestTimes(store).normal).toBe(15000);
+    recordBestTime(store, 'blocks', 'normal', 20000);
+    expect(recordBestTime(store, 'blocks', 'normal', 25000)).toBe(false);
+    expect(recordBestTime(store, 'blocks', 'normal', 15000)).toBe(true);
+    expect(loadBestTimes(store, 'blocks').normal).toBe(15000);
   });
 
   it('난이도별로 따로 저장한다', () => {
     const store = memoryStore();
-    recordBestTime(store, 'easy', 5000);
-    recordBestTime(store, 'hard', 50000);
-    expect(loadBestTimes(store)).toEqual({ easy: 5000, hard: 50000 });
+    recordBestTime(store, 'blocks', 'easy', 5000);
+    recordBestTime(store, 'blocks', 'hard', 50000);
+    expect(loadBestTimes(store, 'blocks')).toEqual({ easy: 5000, hard: 50000 });
+  });
+
+  it('게임별로 따로 저장한다 (쌓기 퍼즐 기록이 블록 퍼즐 기록을 건드리지 않는다)', () => {
+    const store = memoryStore();
+    store.setItem('boardgame.blocks.best.v1', '{"easy":7000}');
+    expect(recordBestTime(store, 'stack', 'easy', 9000)).toBe(true);
+    expect(store.getItem('boardgame.blocks.best.v1')).toBe('{"easy":7000}');
+    expect(store.getItem('boardgame.stack.best.v1')).toBe('{"easy":9000}');
+    expect(loadBestTimes(store, 'stack')).toEqual({ easy: 9000 });
+  });
+
+  it('예전 블록 퍼즐 기록을 그대로 읽는다', () => {
+    const store = memoryStore();
+    store.setItem('boardgame.blocks.best.v1', '{"easy":5000,"hard":42000}');
+    expect(loadBestTimes(store, 'blocks')).toEqual({ easy: 5000, hard: 42000 });
   });
 
   it('0 이하나 숫자가 아닌 시간은 무시한다', () => {
     const store = memoryStore();
-    expect(recordBestTime(store, 'easy', 0)).toBe(false);
-    expect(recordBestTime(store, 'easy', Number.NaN)).toBe(false);
-    expect(loadBestTimes(store)).toEqual({});
+    expect(recordBestTime(store, 'blocks', 'easy', 0)).toBe(false);
+    expect(recordBestTime(store, 'blocks', 'easy', Number.NaN)).toBe(false);
+    expect(loadBestTimes(store, 'blocks')).toEqual({});
   });
 
   it('깨진 기록 데이터는 빈 기록으로 본다', () => {
     const store = memoryStore();
     store.setItem('boardgame.blocks.best.v1', '{"easy":"fast","normal":-1}');
-    expect(loadBestTimes(store)).toEqual({});
+    expect(loadBestTimes(store, 'blocks')).toEqual({});
   });
 
   it('저장소가 막혀 있어도 에러 없이 동작한다', () => {
-    expect(() => recordBestTime(throwingStore, 'easy', 1000)).not.toThrow();
-    expect(loadBestTimes(throwingStore)).toEqual({});
+    expect(() => recordBestTime(throwingStore, 'blocks', 'easy', 1000)).not.toThrow();
+    expect(loadBestTimes(throwingStore, 'blocks')).toEqual({});
   });
 });

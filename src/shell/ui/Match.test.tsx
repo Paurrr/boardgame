@@ -143,7 +143,7 @@ describe('Match', () => {
     fireEvent.click(screen.getByRole('button', { name: '풀기' }));
     expect(screen.getByText('새 기록!')).toBeInTheDocument();
     expect(columns()[0]).toHaveTextContent('완성! 12.3초');
-    expect(loadBestTimes(store)).toEqual({ easy: 12300 });
+    expect(loadBestTimes(store, 'stub')).toEqual({ easy: 12300 });
   });
 
   it('칸 머리 이름 옆에 플레이어 색 블록이 있다', () => {

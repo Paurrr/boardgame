@@ -128,8 +128,8 @@ export function Match({ game, config, seed, store, onExit, onReplay }: Props) {
   const soloTime = solo ? state.solveTimesMs[0] : null;
   useEffect(() => {
     if (soloTime === null) return;
-    setNewRecord(recordBestTime(store, config.players[0].difficulty, soloTime));
-  }, [soloTime, store, config.players]);
+    setNewRecord(recordBestTime(store, game.id, config.players[0].difficulty, soloTime));
+  }, [soloTime, store, game.id, config.players]);
 
   if (state.phase === 'final') {
     return (

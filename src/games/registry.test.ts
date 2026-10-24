@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { findGame, GAMES } from './registry';
+import { blocksGame } from './blocks';
+import { findGame, GAMES, menuGames } from './registry';
+import type { GameModule } from './types';
 
 describe('registry', () => {
   it('블록 퍼즐이 1~4인 게임으로 등록돼 있다', () => {
@@ -16,5 +18,18 @@ describe('registry', () => {
 
   it('없는 id는 undefined', () => {
     expect(findGame('nope')).toBeUndefined();
+  });
+});
+
+describe('menuGames', () => {
+  const visible: GameModule = { ...blocksGame, id: 'visible' };
+  const hiddenGame: GameModule = { ...blocksGame, id: 'secret', hidden: true };
+
+  it('숨긴 게임은 메뉴에서 뺀다', () => {
+    expect(menuGames([visible, hiddenGame], '')).toEqual([visible]);
+  });
+
+  it('주소에 ?dev가 있으면 숨긴 게임도 보여준다', () => {
+    expect(menuGames([visible, hiddenGame], '?dev')).toEqual([visible, hiddenGame]);
   });
 });

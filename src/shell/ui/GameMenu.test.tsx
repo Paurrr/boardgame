@@ -1,10 +1,20 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { blocksGame } from '../../games/blocks';
 import { PLAYER_COLORS } from './colors';
 import { GameMenu } from './GameMenu';
 
+// 숨긴 게임이 메뉴에서 빠지는지 보려고 등록 목록에 숨긴 게임 하나를 더한다
+vi.mock('../../games/registry', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../games/registry')>();
+  return { ...actual, GAMES: [...actual.GAMES, { ...actual.GAMES[0], id: 'secret', name: '숨긴 게임', hidden: true }] };
+});
+
 describe('GameMenu', () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/');
+  });
+
   it('앱 제목과 게임 카드를 보여준다', () => {
     render(<GameMenu onSelect={vi.fn()} />);
     expect(screen.getByRole('heading', { name: '우리집 보드게임' })).toBeInTheDocument();
@@ -34,5 +44,16 @@ describe('GameMenu', () => {
     render(<GameMenu onSelect={vi.fn()} />);
     const card = screen.getByRole('button', { name: /블록 퍼즐/ });
     expect(within(card).getByTestId('game-art').querySelector('svg')).not.toBeNull();
+  });
+
+  it('주소에 ?dev가 없으면 숨긴 게임 카드를 그리지 않는다', () => {
+    render(<GameMenu onSelect={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /숨긴 게임/ })).toBeNull();
+  });
+
+  it('주소에 ?dev가 있으면 숨긴 게임 카드도 그린다', () => {
+    window.history.replaceState(null, '', '/?dev');
+    render(<GameMenu onSelect={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /숨긴 게임/ })).toBeInTheDocument();
   });
 });

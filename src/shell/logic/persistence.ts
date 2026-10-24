@@ -7,7 +7,8 @@ import { clampGameTime, DEFAULT_GAME_TIME_SEC, MAX_NAME_LENGTH } from './setup';
 import type { SavedSetup } from './setup';
 
 const SETUP_KEY = 'boardgame.setup.v1';
-const BEST_KEY = 'boardgame.blocks.best.v1';
+/** 게임마다 따로 둔다. 블록 퍼즐은 예전 키 boardgame.blocks.best.v1 그대로다 */
+const bestKey = (gameId: string) => `boardgame.${gameId}.best.v1`;
 
 export type BestTimes = Partial<Record<Difficulty, number>>;
 
@@ -56,8 +57,8 @@ export function saveSetup(store: KeyValueStore, setup: SavedSetup): void {
   writeJson(store, SETUP_KEY, setup);
 }
 
-export function loadBestTimes(store: KeyValueStore): BestTimes {
-  const data = readJson(store, BEST_KEY);
+export function loadBestTimes(store: KeyValueStore, gameId: string): BestTimes {
+  const data = readJson(store, bestKey(gameId));
   const out: BestTimes = {};
   if (!isRecord(data)) return out;
   for (const d of DIFFICULTIES) {
@@ -68,12 +69,12 @@ export function loadBestTimes(store: KeyValueStore): BestTimes {
 }
 
 /** 1인 모드 한 문제 기록. 최고기록을 깼으면 저장하고 true */
-export function recordBestTime(store: KeyValueStore, difficulty: Difficulty, ms: number): boolean {
+export function recordBestTime(store: KeyValueStore, gameId: string, difficulty: Difficulty, ms: number): boolean {
   if (!isFinite(ms) || ms <= 0) return false;
-  const best = loadBestTimes(store);
+  const best = loadBestTimes(store, gameId);
   const prev = best[difficulty];
   if (prev !== undefined && prev <= ms) return false;
   best[difficulty] = ms;
-  writeJson(store, BEST_KEY, best);
+  writeJson(store, bestKey(gameId), best);
   return true;
 }
