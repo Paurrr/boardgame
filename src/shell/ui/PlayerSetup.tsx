@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import type { GameModule } from '../../games/types';
 import { DIFFICULTIES, DIFFICULTY_LABEL } from '../../lib/difficulty';
-import { ROUND_OPTIONS, TIME_OPTIONS } from '../logic/match';
+import { ROUND_OPTIONS } from '../logic/match';
 import type { PlayerConfig, TimeMode } from '../logic/match';
 import { formatClock } from '../logic/format';
 import {
   finalizeSetup,
+  fitTimeLimit,
   GAME_TIME_MAX_SEC,
   GAME_TIME_MIN_SEC,
   MAX_NAME_LENGTH,
   resizePlayers,
   stepGameTime,
+  timeOptionsOf,
 } from '../logic/setup';
 import type { SavedSetup } from '../logic/setup';
 import { PLAYER_COLORS } from './colors';
@@ -30,7 +32,7 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
   });
   const [rounds, setRounds] = useState(initial.rounds);
   const [timeMode, setTimeMode] = useState<TimeMode>(initial.timeMode);
-  const [timeLimitSec, setTimeLimitSec] = useState(initial.timeLimitSec);
+  const [timeLimitSec, setTimeLimitSec] = useState(() => fitTimeLimit(game, initial.timeLimitSec));
   const [gameTimeSec, setGameTimeSec] = useState(initial.gameTimeSec);
 
   const counts: number[] = [];
@@ -119,7 +121,7 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
           {timeMode === 'round' ? (
             <div className={styles.row} role="group" aria-label="제한시간">
               <span className={styles.label}>제한</span>
-              {TIME_OPTIONS.map((t) => (
+              {timeOptionsOf(game).map((t) => (
                 <button
                   key={t}
                   type="button"

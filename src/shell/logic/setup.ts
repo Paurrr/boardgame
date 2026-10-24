@@ -1,3 +1,4 @@
+import { TIME_OPTIONS } from './match';
 import type { MatchConfig, PlayerConfig, TimeMode } from './match';
 
 /** 플레이어 설정 화면에서 고르는 값 (저장해 두고 다음에 다시 쓴다) */
@@ -32,7 +33,25 @@ export function defaultName(index: number): string {
   return '플레이어 ' + (index + 1);
 }
 
-export function defaultSetup(): SavedSetup {
+/** 게임이 제한시간 선택지·기본값을 따로 정할 때 쓰는 모양 (GameModule의 일부) */
+export type TimeRules = { timeOptions?: readonly number[]; defaultTimeSec?: number };
+
+const DEFAULT_TIME_SEC = 90;
+
+export function timeOptionsOf(rules: TimeRules): readonly number[] {
+  return rules.timeOptions ?? TIME_OPTIONS;
+}
+
+export function defaultTimeOf(rules: TimeRules): number {
+  return rules.defaultTimeSec ?? DEFAULT_TIME_SEC;
+}
+
+/** 선택지에 있는 값이면 그대로, 아니면 게임 기본값 */
+export function fitTimeLimit(rules: TimeRules, sec: number): number {
+  return timeOptionsOf(rules).includes(sec) ? sec : defaultTimeOf(rules);
+}
+
+export function defaultSetup(rules?: TimeRules): SavedSetup {
   return {
     players: [
       { name: defaultName(0), difficulty: 'normal' },
@@ -40,7 +59,7 @@ export function defaultSetup(): SavedSetup {
     ],
     rounds: 5,
     timeMode: 'round',
-    timeLimitSec: 90,
+    timeLimitSec: defaultTimeOf(rules ?? {}),
     gameTimeSec: DEFAULT_GAME_TIME_SEC,
   };
 }

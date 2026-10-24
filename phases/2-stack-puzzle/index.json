@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "shell-time-options",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-24T21:02:59+0900",
+      "completed_at": "2026-10-24T21:05:00+0900",
+      "summary": "GameModule에 timeOptions·defaultTimeSec 추가, setup.ts에 TimeRules·timeOptionsOf·defaultTimeOf·fitTimeLimit·defaultSetup(rules?) 추가, loadSetup은 제한시간을 양의 정수로만 검사, PlayerSetup은 게임 선택지로 버튼을 만들고 fitTimeLimit로 초기값 맞춤, App은 defaultSetup(screen.game) 사용"
     },
     {
       "step": 2,

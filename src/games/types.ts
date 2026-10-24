@@ -18,6 +18,10 @@ export type GameModule = {
   minPlayers: number;
   maxPlayers: number;
   PlayerArea: ComponentType<PlayerAreaProps>;
+  /** 라운드 제한시간 선택지(초). 없으면 60/90/120 */
+  timeOptions?: readonly number[];
+  /** 제한시간 기본값(초). 없으면 90 */
+  defaultTimeSec?: number;
   /** 메뉴 카드에 곁들이는 작은 그림 (없어도 된다) */
   Icon?: ComponentType;
 };

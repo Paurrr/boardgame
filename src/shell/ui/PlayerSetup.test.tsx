@@ -22,6 +22,19 @@ describe('PlayerSetup', () => {
     expect(screen.getByRole('button', { name: '90초' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('게임이 정한 제한시간 선택지로 버튼을 만든다', () => {
+    renderSetup({ ...blocksGame, timeOptions: [90, 120, 150], defaultTimeSec: 120 });
+    const group = screen.getByRole('group', { name: '제한시간' });
+    expect(within(group).getAllByRole('button').map((b) => b.textContent)).toEqual(['90초', '120초', '150초']);
+  });
+
+  it('저장된 제한시간이 이 게임 선택지에 없으면 기본값으로 맞추고 이름은 그대로 둔다', () => {
+    const initial = { ...defaultSetup(), players: [{ name: '서연', difficulty: 'easy' as const }], timeLimitSec: 150 };
+    renderSetup(blocksGame, initial);
+    expect(screen.getByRole('button', { name: '90초' })).toHaveAttribute('aria-pressed', 'true');
+    expect((nameInputs()[0] as HTMLInputElement).value).toBe('서연');
+  });
+
   it('인원을 바꾸면 이름 칸 수가 바뀐다', () => {
     renderSetup();
     fireEvent.click(screen.getByRole('button', { name: '4명' }));

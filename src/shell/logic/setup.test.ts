@@ -4,11 +4,38 @@ import {
   defaultName,
   defaultSetup,
   finalizeSetup,
+  fitTimeLimit,
   MAX_NAME_LENGTH,
   resizePlayers,
   stepGameTime,
+  timeOptionsOf,
   toMatchConfig,
 } from './setup';
+
+const STACK_TIME = { timeOptions: [90, 120, 150], defaultTimeSec: 120 } as const;
+
+describe('게임별 제한시간 선택지', () => {
+  it('게임이 정하지 않으면 60/90/120', () => {
+    expect(timeOptionsOf({})).toEqual([60, 90, 120]);
+  });
+
+  it('게임이 정하면 그 선택지', () => {
+    expect(timeOptionsOf(STACK_TIME)).toEqual([90, 120, 150]);
+  });
+
+  it('선택지에 없는 값은 게임 기본값으로 맞춘다', () => {
+    expect(fitTimeLimit(STACK_TIME, 60)).toBe(120);
+    expect(fitTimeLimit({}, 150)).toBe(90);
+  });
+
+  it('선택지에 있는 값은 그대로', () => {
+    expect(fitTimeLimit(STACK_TIME, 150)).toBe(150);
+  });
+
+  it('defaultSetup은 게임 기본 시간을 쓴다', () => {
+    expect(defaultSetup(STACK_TIME).timeLimitSec).toBe(120);
+  });
+});
 
 describe('defaultSetup', () => {
   it('2명, 보통, 5라운드, 90초', () => {

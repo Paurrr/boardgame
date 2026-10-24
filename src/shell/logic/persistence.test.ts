@@ -52,6 +52,13 @@ describe('setup 저장', () => {
     expect(loadSetup(store)).toEqual({ players, rounds: 5, timeMode: 'round', timeLimitSec: 90, gameTimeSec: 300 });
   });
 
+  it('다른 게임의 제한시간(150초)도 그대로 돌려준다', () => {
+    const store = memoryStore();
+    const setup = { ...defaultSetup(), players: [{ name: '민준', difficulty: 'easy' as const }], rounds: 3, timeLimitSec: 150 };
+    saveSetup(store, setup);
+    expect(loadSetup(store)).toEqual(setup);
+  });
+
   it('판 전체 시간은 10초 단위로 정리한다', () => {
     const store = memoryStore();
     store.setItem(SETUP_KEY, JSON.stringify({ ...defaultSetup(), gameTimeSec: 47 }));
@@ -70,7 +77,10 @@ describe('setup 저장', () => {
     ['모르는 난이도', JSON.stringify({ ...defaultSetup(), players: [{ name: 'a', difficulty: 'expert' }] })],
     ['이름이 문자열이 아님', JSON.stringify({ ...defaultSetup(), players: [{ name: 3, difficulty: 'easy' }] })],
     ['없는 라운드 수', JSON.stringify({ ...defaultSetup(), rounds: 4 })],
-    ['없는 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: 30 })],
+    ['0초 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: 0 })],
+    ['음수 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: -60 })],
+    ['NaN 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: NaN })],
+    ['문자열 제한시간', JSON.stringify({ ...defaultSetup(), timeLimitSec: '90' })],
     ['모르는 시간 방식', JSON.stringify({ ...defaultSetup(), timeMode: 'fast' })],
     ['판 전체 시간이 숫자가 아님', JSON.stringify({ ...defaultSetup(), gameTimeSec: '50' })],
   ])('%s이면 null', (_name, raw) => {

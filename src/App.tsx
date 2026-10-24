@@ -32,7 +32,7 @@ export default function App() {
       {screen.kind === 'setup' && (
         <PlayerSetup
           game={screen.game}
-          initial={loadSetup(store) ?? defaultSetup()}
+          initial={loadSetup(store) ?? defaultSetup(screen.game)}
           onBack={() => setScreen({ kind: 'menu' })}
           onStart={(setup) => startMatch(screen.game, setup)}
         />
