@@ -55,7 +55,8 @@
       "name": "stack-scene",
       "status": "completed",
       "started_at": "2026-10-24T21:23:42+0900",
-      "summary": "src/games/stack/ui/CubeScene.tsx: CubeKind·Xf{M,pivot}(그릴 때만 world = pivot + M(p − pivot))·SceneCube 타입, CubeScene({cam,toScreen,cubes})는 Fragment로 정육면체마다 <g data-piece class=xray?>를 xf 적용 중심의 depth 오름차순(먼 것부터)으로 그림, 면 6개 중 xf 적용 법선 n·cam.d > 1e-6만, 같은 group(빈칸 제외) 맞닿은 면 생략·빈칸은 xf 없는 모든 칸과 맞닿은 면 생략, 면마다 색 다각형(빈칸은 fill 속성 없음) + s = max(0,(1−n.z)(0.24+0.14·n·r)) > 0.01이면 음영 다각형(fill-opacity s, 빈칸 s×0.4), 꼭짓점 toFixed(3). CubeScene.module.css(판 단위): face(--ink 0.035)·selected(0.1)·preview(fill-opacity 0.85, pointer-events 없음)·ghost(--target 0.4·--ink-soft 점선, pointer-events 없음)·shade(--ink, pointer-events 없음)·xray(opacity 0.25) + 테스트 8개(면 3·음영 2, 같은/다른 group 5/6면, 깊이 순서, ghost fill 없음, 빈칸 생략은 xf 없는 칸만, data-piece, xray 클래스)"
+      "summary": "src/games/stack/ui/CubeScene.tsx: CubeKind·Xf{M,pivot}(그릴 때만 world = pivot + M(p − pivot))·SceneCube 타입, CubeScene({cam,toScreen,cubes})는 Fragment로 정육면체마다 <g data-piece class=xray?>를 xf 적용 중심의 depth 오름차순(먼 것부터)으로 그림, 면 6개 중 xf 적용 법선 n·cam.d > 1e-6만, 같은 group(빈칸 제외) 맞닿은 면 생략·빈칸은 xf 없는 모든 칸과 맞닿은 면 생략, 면마다 색 다각형(빈칸은 fill 속성 없음) + s = max(0,(1−n.z)(0.24+0.14·n·r)) > 0.01이면 음영 다각형(fill-opacity s, 빈칸 s×0.4), 꼭짓점 toFixed(3). CubeScene.module.css(판 단위): face(--ink 0.035)·selected(0.1)·preview(fill-opacity 0.85, pointer-events 없음)·ghost(--target 0.4·--ink-soft 점선, pointer-events 없음)·shade(--ink, pointer-events 없음)·xray(opacity 0.25) + 테스트 8개(면 3·음영 2, 같은/다른 group 5/6면, 깊이 순서, ghost fill 없음, 빈칸 생략은 xf 없는 칸만, data-piece, xray 클래스)",
+      "completed_at": "2026-10-24T21:26:58+0900"
     },
     {
       "step": 7,
