@@ -61,7 +61,10 @@
     {
       "step": 7,
       "name": "stack-layout",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-24T21:26:58+0900",
+      "summary": "src/lib/rects.ts(Point·Rect·freeSpot를 1탄에서 그대로 옮김, 1탄 layout.ts는 import 후 재수출해 동작 변화 없음) + src/games/stack/ui/layout.ts(순수 TS): TRAY_SCALE 0.6·PAD 0.4·GAP 0.45·SLOT_PAD 0.3·BTN_W 3.6·BTN_H 1.4·BTN_GAP 0.6·BTN_DEPTH 0.24·MIN_BUTTON_PX 56, StackLayout 타입, boardBoxSize(w=hypot(W,D), h=EL_MIN~EL_MAX 1° 간격 max(diag·sin+MAX_H·cos)), slotSizeFor(orientations의 3D 대각선 최대×0.6+0.3), computeLayout(위에서 PAD·판 상자·GAP·버튼 줄(w=n·BTN_W+(n−1)·BTN_GAP 고정, h=buttonH+BTN_DEPTH)·GAP·트레이·PAD, 모두 가로 가운데, 트레이 1줄/2줄 중 scale 큰 쪽, 버튼 높이는 반복 대신 줄 수마다 가로·세로 맞춤 식을 바로 풀어 buttonH×scale≥56의 최솟값(×(1+1e-9))을 쓰고 크기를 모르면 BTN_H·scale 1), boardOrigin(판 상자 가운데+(0, MAX_H/2·cos el)), clientToSvg(xMidYMax meet 여백 반영, 크기 모르면 1px=1), looseAreas(보이는 범위 PAD 안쪽에서 판 상자·버튼 줄을 뺀 가장 큰 빈 직사각형 9개 중 넓이 있는 것, 첫째가 버튼 줄 아래 트레이 자리), looseSpot(가운데 좌표로 freeSpot, 안 움직인 축은 center 그대로) + 테스트 rects 5개·layout 26개(4인 316×440 어려움 버튼 56px, 칠판 1~4인 폭, 어느 시점에서도 판이 판 상자 안, 슬롯에 어느 방향·시점 조각이 들어감, Review Focus 4 looseSpot)",
+      "completed_at": "2026-10-24T21:36:32+0900"
     },
     {
       "step": 8,
