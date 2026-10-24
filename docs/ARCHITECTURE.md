@@ -17,11 +17,13 @@ src/
 │   ├── useElementSize.ts        # 요소 크기 측정
 │   ├── storage.ts               # localStorage 래퍼
 │   ├── sound.ts                 # WebAudio 합성음
-│   └── fullscreen.ts            # 전체화면 (webkit 접두사 포함)
+│   ├── fullscreen.ts            # 전체화면 (webkit 접두사 포함)
+│   ├── rects.ts                 # 사각형 계산 (판 밖 조각을 둘 빈 영역 등, 게임 공용)
+│   └── devMode.ts               # 주소의 ?dev 표시 확인 (숨긴 게임 노출)
 ├── games/
 │   ├── types.ts                 # GameModule, PlayerAreaProps (셸↔게임 계약)
 │   ├── registry.ts              # 게임 목록
-│   └── blocks/
+│   ├── blocks/
 │       ├── index.ts             # blocksGame: GameModule
 │       ├── logic/               # 순수 TS
 │       │   ├── types.ts         # Cell, PieceId, Orientation, Placement, Puzzle, BoardArea, PlaceMode
@@ -38,6 +40,21 @@ src/
 │           ├── PieceView.tsx    # 조각 하나
 │           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
 │           └── PlayerArea.module.css  # 칸·조각·판 버튼 스타일 (MenuIcon도 함께 씀)
+│   └── stack/                   # 2탄 쌓기 퍼즐 (3D, ADR-008)
+│       ├── index.ts             # stackGame: GameModule (id 'stack', 1~4인)
+│       ├── logic/               # 순수 TS
+│       │   ├── types.ts         # Vec3, StackPieceId, Area, Placed, Puzzle
+│       │   ├── pieces.ts        # 조각 10종 정의·색
+│       │   ├── rotate.ts        # normalize, rotZ, 축 회전(눕히기), orientations
+│       │   ├── board.ts         # dropZ, landing, canLift, isSolved
+│       │   ├── solver.ts        # solveStack, buildable
+│       │   └── generator.ts     # generatePuzzle(rng, difficulty)
+│       └── ui/
+│           ├── camera.ts        # 순수 TS: makeCamera, project, unproject, tipAxis, landingNear
+│           ├── layout.ts        # 판·버튼 줄·트레이 배치 (순수 TS)
+│           ├── CubeScene.tsx    # 정육면체 묶음 그리기 (면 선택·음영·깊이 정렬)
+│           ├── PlayerArea.tsx   # 판·버튼·트레이, 끌기·돌리기·판 돌리기
+│           └── MenuIcon.tsx     # 메뉴 카드 그림
 └── shell/
     ├── logic/
     │   ├── match.ts             # 판 진행 reducer, 점수, 남은 시간, 시드
