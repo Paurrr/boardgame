@@ -1,0 +1,56 @@
+{
+  "project": "우리집 보드게임",
+  "phase": "2-stack-puzzle",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-rules",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "shell-time-options",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "shell-records-hidden",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "stack-logic",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "stack-generator",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "stack-camera",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "stack-scene",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "stack-layout",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "stack-play",
+      "status": "pending"
+    },
+    {
+      "step": 9,
+      "name": "stack-motion",
+      "status": "pending"
+    }
+  ]
+}
