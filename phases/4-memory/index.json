@@ -31,7 +31,8 @@
       "name": "pairs-result",
       "status": "completed",
       "started_at": "2026-10-25T22:04:51+0900",
-      "summary": "OwnMatchProps.store(App이 넘김, BellMatch.test에 memoryStore 추가), pairs/ui: levelText.ts(levelText·LEVEL_TEXT·levelBadge), PairsResult.tsx(SoloRecord, FinalResult.module.css, place 1 여럿=공동 우승, 혼자=횟수·최고기록·새 기록!)"
+      "summary": "OwnMatchProps.store(App이 넘김, BellMatch.test에 memoryStore 추가), pairs/ui: levelText.ts(levelText·LEVEL_TEXT·levelBadge), PairsResult.tsx(SoloRecord, FinalResult.module.css, place 1 여럿=공동 우승, 혼자=횟수·최고기록·새 기록!)",
+      "completed_at": "2026-10-25T22:07:53+0900"
     },
     {
       "step": 4,
