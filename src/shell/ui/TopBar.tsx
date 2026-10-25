@@ -4,6 +4,8 @@ import styles from './Match.module.css';
 
 /** 라운드 글자는 round·rounds가 둘 다 있을 때만, 시계는 clock이 있을 때만 그린다 */
 type Props = {
+  /** 라운드 자리에 보이는 짧은 글 (예: 보통 · 2.4초) */
+  label?: string;
   round?: number;
   rounds?: number;
   clock?: string;
@@ -18,7 +20,7 @@ type Props = {
 const CONFIRM_MS = 3000;
 
 /** 어른이 쓰는 위쪽 막대. 그만하기는 아이가 실수로 누르지 않게 두 번 눌러야 한다 */
-export function TopBar({ round, rounds, clock, clockLabel, urgent, muted, onToggleMute, onExit }: Props) {
+export function TopBar({ label, round, rounds, clock, clockLabel, urgent, muted, onToggleMute, onExit }: Props) {
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export function TopBar({ round, rounds, clock, clockLabel, urgent, muted, onTogg
 
   return (
     <header className={styles.topBar}>
+      {label !== undefined && <span className={styles.round}>{label}</span>}
       {round !== undefined && rounds !== undefined && (
         <span className={styles.round}>{`라운드 ${round}/${rounds}`}</span>
       )}

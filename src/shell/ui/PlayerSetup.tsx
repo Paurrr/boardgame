@@ -38,6 +38,9 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
     puzzle ? fitTimeLimit(puzzle, initial.timeLimitSec) : initial.timeLimitSec,
   );
   const [gameTimeSec, setGameTimeSec] = useState(initial.gameTimeSec);
+  // 판 전체 난이도는 levels를 준 own 게임만 고른다. 나머지 게임은 저장된 값을 그대로 넘긴다
+  const levels = game.kind === 'own' ? game.levels : undefined;
+  const [level, setLevel] = useState(initial.level);
 
   const counts: number[] = [];
   for (let n = game.minPlayers; n <= game.maxPlayers; n++) counts.push(n);
@@ -94,6 +97,23 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
         </div>
 
         <div className={styles.how}>
+          {levels && (
+            <>
+              <div className={styles.row} role="group" aria-label="난이도">
+                <span className={styles.label}>난이도</span>
+                {DIFFICULTIES.map((d) => (
+                  <button key={d} type="button" className="btn" aria-pressed={level === d} onClick={() => setLevel(d)}>
+                    {DIFFICULTY_LABEL[d]}
+                  </button>
+                ))}
+              </div>
+              {/* 고른 단계가 어떤지 바로 보여 줘야 해 보고 준비할 수 있다 */}
+              <p className={styles.levelDesc} data-testid="level-desc">
+                {levels[level]}
+              </p>
+            </>
+          )}
+
           {puzzle && (
             <>
               <div className={styles.row} role="group" aria-label="라운드">
@@ -182,7 +202,7 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
             <button
               type="button"
               className={'btn btn-primary ' + styles.start}
-              onClick={() => onStart(finalizeSetup({ players, rounds, timeMode, timeLimitSec, gameTimeSec }))}
+              onClick={() => onStart(finalizeSetup({ players, rounds, timeMode, timeLimitSec, gameTimeSec, level }))}
             >
               시작!
             </button>

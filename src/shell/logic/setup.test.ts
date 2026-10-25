@@ -32,6 +32,10 @@ describe('게임별 제한시간 선택지', () => {
     expect(fitTimeLimit(STACK_TIME, 150)).toBe(150);
   });
 
+  it('defaultSetup의 판 난이도는 보통이다', () => {
+    expect(defaultSetup().level).toBe('normal');
+  });
+
   it('defaultSetup은 게임 기본 시간을 쓴다', () => {
     expect(defaultSetup(STACK_TIME).timeLimitSec).toBe(120);
   });
@@ -48,6 +52,7 @@ describe('defaultSetup', () => {
       timeMode: 'round',
       timeLimitSec: 90,
       gameTimeSec: 300,
+      level: 'normal',
     });
   });
 
@@ -107,6 +112,7 @@ describe('finalizeSetup', () => {
       timeMode: 'round',
       timeLimitSec: 60,
       gameTimeSec: 300,
+      level: 'normal',
     });
     expect(out.players).toEqual([
       { name: '플레이어 1', difficulty: 'easy' },
@@ -121,6 +127,7 @@ describe('finalizeSetup', () => {
       timeMode: 'round',
       timeLimitSec: 60,
       gameTimeSec: 300,
+      level: 'normal',
     });
     expect(out.players[0].name).toHaveLength(MAX_NAME_LENGTH);
   });
@@ -132,8 +139,16 @@ describe('finalizeSetup', () => {
 });
 
 describe('toMatchConfig', () => {
-  it('게임 id를 붙인다', () => {
-    expect(toMatchConfig('blocks', defaultSetup())).toEqual({ gameId: 'blocks', ...defaultSetup() });
+  it('게임 id를 붙인다 (판 난이도는 퍼즐 경기 설정에 넣지 않는다)', () => {
+    const s = defaultSetup();
+    expect(toMatchConfig('blocks', s)).toEqual({
+      gameId: 'blocks',
+      players: s.players,
+      rounds: s.rounds,
+      timeMode: s.timeMode,
+      timeLimitSec: s.timeLimitSec,
+      gameTimeSec: s.gameTimeSec,
+    });
   });
 
   it('시간 방식과 판 전체 시간을 넘긴다', () => {

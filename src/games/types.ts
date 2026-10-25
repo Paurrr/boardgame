@@ -38,14 +38,18 @@ export type PuzzleGame = GameInfo & {
 export type OwnMatchProps = {
   playerNames: readonly string[];
   seed: number;
+  /** 판 전체 난이도. levels가 없는 게임은 쓰지 않아도 된다 */
+  level: Difficulty;
   onExit: () => void;
   onReplay: () => void;
 };
 
-/** 경기 화면을 통째로 맡는 게임. 설정에서는 인원·이름만 고른다 */
+/** 경기 화면을 통째로 맡는 게임. 설정에서는 인원·이름(과 levels가 있으면 판 난이도)만 고른다 */
 export type OwnMatchGame = GameInfo & {
   kind: 'own';
   Match: ComponentType<OwnMatchProps>;
+  /** 단계별 설명. 있으면 설정 화면에 판 난이도 줄과 고른 단계의 설명을 보인다 */
+  levels?: Record<Difficulty, string>;
 };
 
 export type GameModule = PuzzleGame | OwnMatchGame;

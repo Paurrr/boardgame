@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { GameModule } from './games/types';
+import type { Difficulty } from './lib/difficulty';
 import { randomSeed } from './lib/random';
 import { unlockAudio } from './lib/sound';
 import { browserStore } from './lib/storage';
@@ -14,7 +15,7 @@ import { PlayerSetup } from './shell/ui/PlayerSetup';
 type Screen =
   | { kind: 'menu' }
   | { kind: 'setup'; game: GameModule }
-  | { kind: 'match'; game: GameModule; config: MatchConfig; seed: number };
+  | { kind: 'match'; game: GameModule; config: MatchConfig; level: Difficulty; seed: number };
 
 export default function App() {
   const store = useMemo(() => browserStore(), []);
@@ -22,7 +23,7 @@ export default function App() {
 
   const startMatch = (game: GameModule, setup: SavedSetup) => {
     saveSetup(store, setup);
-    setScreen({ kind: 'match', game, config: toMatchConfig(game.id, setup), seed: randomSeed() });
+    setScreen({ kind: 'match', game, config: toMatchConfig(game.id, setup), level: setup.level, seed: randomSeed() });
   };
 
   return (
@@ -44,6 +45,7 @@ export default function App() {
             key={screen.seed}
             playerNames={screen.config.players.map((p) => p.name)}
             seed={screen.seed}
+            level={screen.level}
             onExit={() => setScreen({ kind: 'menu' })}
             onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
           />

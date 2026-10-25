@@ -1,3 +1,4 @@
+import type { Difficulty } from '../../lib/difficulty';
 import { TIME_OPTIONS } from './match';
 import type { MatchConfig, PlayerConfig, TimeMode } from './match';
 
@@ -8,6 +9,8 @@ export type SavedSetup = {
   timeMode: TimeMode;
   timeLimitSec: number;
   gameTimeSec: number;
+  /** 판 전체 난이도 (경기 화면을 맡는 게임 중 levels가 있는 게임만 쓴다) */
+  level: Difficulty;
 };
 
 export const MAX_NAME_LENGTH = 8;
@@ -61,6 +64,7 @@ export function defaultSetup(rules?: TimeRules): SavedSetup {
     timeMode: 'round',
     timeLimitSec: defaultTimeOf(rules ?? {}),
     gameTimeSec: DEFAULT_GAME_TIME_SEC,
+    level: 'normal',
   };
 }
 

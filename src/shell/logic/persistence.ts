@@ -37,7 +37,7 @@ function writeJson(store: KeyValueStore, key: string, value: unknown): void {
 export function loadSetup(store: KeyValueStore): SavedSetup | null {
   const data = readJson(store, SETUP_KEY);
   if (!isRecord(data)) return null;
-  const { players, rounds, timeMode = 'round', timeLimitSec, gameTimeSec = DEFAULT_GAME_TIME_SEC } = data;
+  const { players, rounds, timeMode = 'round', timeLimitSec, gameTimeSec = DEFAULT_GAME_TIME_SEC, level } = data;
   if (!Array.isArray(players) || players.length < 1 || players.length > 4) return null;
   const parsed: PlayerConfig[] = [];
   for (const p of players) {
@@ -50,7 +50,15 @@ export function loadSetup(store: KeyValueStore): SavedSetup | null {
   // 시간 방식·판 전체 시간은 나중에 생긴 값이라 예전 저장값에는 없다 (없으면 기본값)
   if (timeMode !== 'round' && timeMode !== 'game') return null;
   if (typeof gameTimeSec !== 'number') return null;
-  return { players: parsed, rounds, timeMode, timeLimitSec, gameTimeSec: clampGameTime(gameTimeSec) };
+  // 판 난이도도 나중에 생긴 값이다. 없거나 잘못되면 보통 (설정 전체를 버리지 않는다)
+  return {
+    players: parsed,
+    rounds,
+    timeMode,
+    timeLimitSec,
+    gameTimeSec: clampGameTime(gameTimeSec),
+    level: isDifficulty(level) ? level : 'normal',
+  };
 }
 
 export function saveSetup(store: KeyValueStore, setup: SavedSetup): void {

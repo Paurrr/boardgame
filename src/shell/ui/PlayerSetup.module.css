@@ -64,6 +64,15 @@
   background: var(--panel);
 }
 
+/* 고른 판 난이도의 설명: 단계 버튼 바로 아래, 버튼 줄과 같은 왼쪽 선에서 */
+.levelDesc {
+  max-width: 26rem;
+  margin: 0 0 1rem 5rem;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
 /* 판 전체 시간 값: 버튼 사이에서 숫자가 바뀌어도 폭이 흔들리지 않게 */
 .gameTime {
   min-width: 4rem;

@@ -11,6 +11,11 @@ describe('TopBar', () => {
     expect(screen.getByRole('button', { name: '그만하기' })).toBeInTheDocument();
   });
 
+  it('label을 넘기면 왼쪽에 그 글을 보인다', () => {
+    render(<TopBar label="보통 · 2.4초" muted={false} onToggleMute={vi.fn()} onExit={vi.fn()} />);
+    expect(screen.getByText('보통 · 2.4초')).toBeInTheDocument();
+  });
+
   it('라운드·시계를 넘기면 함께 그린다', () => {
     render(
       <TopBar round={2} rounds={5} clock="1:30" urgent={false} muted={false} onToggleMute={vi.fn()} onExit={vi.fn()} />,

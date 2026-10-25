@@ -26,6 +26,12 @@ const ownGame: OwnMatchGame = {
   Match: () => null,
 };
 
+// 판 전체 난이도를 고르는 own 게임. 단계별 설명은 게임이 준다
+const leveledGame: OwnMatchGame = {
+  ...ownGame,
+  levels: { easy: '쉬운 설명', normal: '보통 설명', hard: '어려운 설명' },
+};
+
 describe('PlayerSetup', () => {
   it('처음 설정값을 보여준다', () => {
     renderSetup();
@@ -73,6 +79,7 @@ describe('PlayerSetup', () => {
       timeMode: 'round',
       timeLimitSec: 60,
       gameTimeSec: 300,
+      level: 'normal',
     });
   });
 
@@ -163,6 +170,7 @@ describe('PlayerSetup', () => {
       timeMode: 'game',
       timeLimitSec: 150,
       gameTimeSec: 200,
+      level: 'normal',
     };
     const { onStart } = renderSetup(ownGame, initial);
     expect(nameInputs()).toHaveLength(2);
@@ -175,6 +183,31 @@ describe('PlayerSetup', () => {
       timeLimitSec: setup.timeLimitSec,
       gameTimeSec: setup.gameTimeSec,
     }).toEqual({ rounds: 9, timeMode: 'game', timeLimitSec: 150, gameTimeSec: 200 });
+  });
+
+  it('난이도 설명이 없는 own 게임에는 판 난이도 줄도 없다', () => {
+    renderSetup(ownGame);
+    expect(screen.queryByRole('group', { name: '난이도' })).toBeNull();
+    expect(screen.queryByTestId('level-desc')).toBeNull();
+  });
+
+  it('난이도 설명이 있는 own 게임은 판 난이도 줄과 고른 단계의 설명을 보이고 고른 값으로 시작한다', () => {
+    const { onStart } = renderSetup(leveledGame, { ...defaultSetup(), level: 'hard' });
+    const row = screen.getByRole('group', { name: '난이도' });
+    expect(within(row).getAllByRole('button').map((b) => b.textContent)).toEqual(['쉬움', '보통', '어려움']);
+    expect(within(row).getByRole('button', { name: '어려움' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('level-desc')).toHaveTextContent('어려운 설명');
+    fireEvent.click(within(row).getByRole('button', { name: '쉬움' }));
+    expect(screen.getByTestId('level-desc')).toHaveTextContent('쉬운 설명');
+    fireEvent.click(screen.getByRole('button', { name: '시작!' }));
+    expect(onStart.mock.calls[0][0].level).toBe('easy');
+  });
+
+  it('퍼즐 게임은 판 난이도 줄이 없고 저장된 판 난이도를 그대로 넘긴다', () => {
+    const { onStart } = renderSetup(blocksGame, { ...defaultSetup(), level: 'hard' });
+    expect(screen.queryByRole('group', { name: '난이도' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '시작!' }));
+    expect(onStart.mock.calls[0][0].level).toBe('hard');
   });
 
   it('메뉴 버튼은 onBack', () => {

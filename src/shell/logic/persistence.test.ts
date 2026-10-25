@@ -45,11 +45,32 @@ describe('setup 저장', () => {
     expect(loadSetup(store)).toEqual(setup);
   });
 
-  it('시간 방식이 없던 예전 저장값은 라운드마다, 판 전체 300초로 채운다', () => {
+  it('시간 방식·판 난이도가 없던 예전 저장값은 라운드마다, 판 전체 300초, 보통으로 채운다', () => {
     const store = memoryStore();
     const { players } = defaultSetup();
     store.setItem(SETUP_KEY, JSON.stringify({ players, rounds: 5, timeLimitSec: 90 }));
-    expect(loadSetup(store)).toEqual({ players, rounds: 5, timeMode: 'round', timeLimitSec: 90, gameTimeSec: 300 });
+    expect(loadSetup(store)).toEqual({
+      players,
+      rounds: 5,
+      timeMode: 'round',
+      timeLimitSec: 90,
+      gameTimeSec: 300,
+      level: 'normal',
+    });
+  });
+
+  it('판 난이도를 저장하고 불러온다', () => {
+    const store = memoryStore();
+    saveSetup(store, { ...defaultSetup(), level: 'hard' });
+    expect(loadSetup(store)?.level).toBe('hard');
+  });
+
+  it('판 난이도가 잘못된 값이면 보통으로 본다 (다른 값은 그대로)', () => {
+    const store = memoryStore();
+    store.setItem(SETUP_KEY, JSON.stringify({ ...defaultSetup(), rounds: 9, level: 'x' }));
+    const loaded = loadSetup(store);
+    expect(loaded?.level).toBe('normal');
+    expect(loaded?.rounds).toBe(9);
   });
 
   it('다른 게임의 제한시간(150초)도 그대로 돌려준다', () => {
