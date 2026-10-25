@@ -55,7 +55,7 @@ src/
 │           ├── CubeScene.tsx    # 정육면체 묶음 그리기 (면 선택·음영·깊이 정렬)
 │           ├── PlayerArea.tsx   # 판·버튼·트레이, 끌기·돌리기·판 돌리기
 │           └── MenuIcon.tsx     # 메뉴 카드 그림
-│   └── bell/                    # 3탄 과일 종치기 (ADR-009)
+│   ├── bell/                    # 3탄 과일 종치기 (ADR-009)
 │       ├── index.ts             # bellGame: OwnMatchGame (id 'bell', 2~4인)
 │       ├── logic/               # 순수 TS
 │       │   ├── types.ts         # Card, Pile, BellState, BellAction
@@ -70,6 +70,11 @@ src/
 │           ├── Lane.tsx         # 칸 하나 (펼친 카드·뒤집기·종)
 │           ├── BellMatch.tsx    # 경기 화면 전체 (Match)
 │           └── BellResult.tsx   # 최종 결과 (늦게 탈락한 순서)
+│   └── pairs/                   # 4탄 짝 맞추기 (ADR-010)
+│       ├── index.ts             # pairsGame: OwnMatchGame (id 'pairs', 1~4인)
+│       ├── logic/  types.ts  level.ts  game.ts   # 순수 TS (pairsReducer, standings)
+│       └── ui/  pictures.tsx  Card.tsx  Board.tsx  TurnHeader.tsx
+│                levelText.ts  PairsResult.tsx  PairsMatch.tsx(Match)  MenuIcon.tsx
 └── shell/
     ├── logic/
     │   ├── match.ts             # 판 진행 reducer, 점수, 남은 시간, 시드
@@ -92,7 +97,7 @@ src/
   ```ts
   type GameInfo = { id; name; description; minPlayers; maxPlayers; Icon?; hidden? };
   type PuzzleGame = GameInfo & { kind?: 'puzzle'; PlayerArea: React.FC<PlayerAreaProps>; … };
-  type OwnMatchGame = GameInfo & { kind: 'own'; Match: React.FC<{ playerNames; seed; onExit; onReplay }> };
+  type OwnMatchGame = GameInfo & { kind: 'own'; Match: React.FC<{ playerNames; seed; level; store; onExit; onReplay }> };
   type GameModule = PuzzleGame | OwnMatchGame;
   ```
   둘 다 맞지 않는 게임은 그 게임을 추가할 때 셸을 확장한다.
@@ -106,7 +111,7 @@ PlayerSetup ─(MatchConfig)→ matchReducer ─(라운드·시드·active)→ P
                        START_ROUND / SOLVED(player, now)  PlayerArea × N (각 칸 독립)
                        TIME_UP / NEXT_ROUND  ←───────── onSolved() ──┘
 matchReducer ─(roundPoints, 총점)→ 라운드 결과(Match 안) / FinalResult
-own 게임: PlayerSetup ─(인원·이름)→ App → game.Match(playerNames, seed)
+own 게임: PlayerSetup ─(인원·이름)→ App → game.Match(playerNames, seed, level, store)
 ```
 
 ## 상태 관리
