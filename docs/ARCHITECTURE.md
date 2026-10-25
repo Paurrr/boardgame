@@ -21,7 +21,7 @@ src/
 │   ├── rects.ts                 # 사각형 계산 (판 밖 조각을 둘 빈 영역 등, 게임 공용)
 │   └── devMode.ts               # 주소의 ?dev 표시 확인 (숨긴 게임 노출)
 ├── games/
-│   ├── types.ts                 # GameModule, PlayerAreaProps (셸↔게임 계약)
+│   ├── types.ts                 # GameModule, PlayerAreaProps, OwnMatchProps (셸↔게임 계약)
 │   ├── registry.ts              # 게임 목록
 │   ├── blocks/
 │       ├── index.ts             # blocksGame: GameModule
@@ -40,7 +40,7 @@ src/
 │           ├── PieceView.tsx    # 조각 하나
 │           ├── PlayerArea.tsx   # 플레이어 칸 하나 (GameModule.PlayerArea)
 │           └── PlayerArea.module.css  # 칸·조각·판 버튼 스타일 (MenuIcon도 함께 씀)
-│   └── stack/                   # 2탄 쌓기 퍼즐 (3D, ADR-008)
+│   ├── stack/                   # 2탄 쌓기 퍼즐 (3D, ADR-008)
 │       ├── index.ts             # stackGame: GameModule (id 'stack', 1~4인)
 │       ├── logic/               # 순수 TS
 │       │   ├── types.ts         # Vec3, StackPieceId, Area, Placed, Puzzle
@@ -55,6 +55,21 @@ src/
 │           ├── CubeScene.tsx    # 정육면체 묶음 그리기 (면 선택·음영·깊이 정렬)
 │           ├── PlayerArea.tsx   # 판·버튼·트레이, 끌기·돌리기·판 돌리기
 │           └── MenuIcon.tsx     # 메뉴 카드 그림
+│   └── bell/                    # 3탄 과일 종치기 (ADR-009)
+│       ├── index.ts             # bellGame: OwnMatchGame (id 'bell', 2~4인)
+│       ├── logic/               # 순수 TS
+│       │   ├── types.ts         # Card, Pile, BellState, BellAction
+│       │   ├── cards.ts         # 덱 56장, 나누기, 합 5 판정
+│       │   ├── game.ts          # bellReducer: 뒤집기·종·벌칙·탈락, ranking
+│       │   └── press.ts         # 종 누르기 순서 판정 (톡·기다림)
+│       └── ui/
+│           ├── FruitIcon.tsx    # 과일 그림
+│           ├── FruitCard.tsx    # 카드 하나 (과일 1~5개)
+│           ├── MenuIcon.tsx     # 메뉴 카드 그림
+│           ├── notice.ts        # 순수 TS: 종 결과 문구
+│           ├── Lane.tsx         # 칸 하나 (펼친 카드·뒤집기·종)
+│           ├── BellMatch.tsx    # 경기 화면 전체 (Match)
+│           └── BellResult.tsx   # 최종 결과 (늦게 탈락한 순서)
 └── shell/
     ├── logic/
     │   ├── match.ts             # 판 진행 reducer, 점수, 남은 시간, 시드
@@ -66,22 +81,21 @@ src/
         ├── PlayLayout.tsx/.module.css   # 가로 칸 분할 (위 1/3 정보, 아래 2/3 조작)
         ├── GameMenu.tsx/.module.css
         ├── PlayerSetup.tsx/.module.css
-        ├── TopBar.tsx           # 라운드·시간·소리·전체화면·그만하기
+        ├── TopBar.tsx           # 라운드·시간(있을 때)·소리·전체화면·그만하기
         ├── Match.tsx/.module.css        # 카운트다운·플레이·라운드 결과
         └── FinalResult.tsx/.module.css
 ```
 테스트 파일은 대상 옆에 `*.test.ts(x)`로 둔다.
 
 ## 패턴
-- **셸 + 게임 모듈**: 셸이 메뉴·설정·칸 분할·라운드·타이머·점수를 맡고, 게임은 플레이어 칸 하나(`PlayerArea`)만 책임진다. 게임은 풀었을 때 `onSolved()`만 호출한다.
+- **셸 + 게임 모듈**: 셸이 메뉴·설정·칸 분할·라운드·타이머·점수를 맡고, 퍼즐 게임은 플레이어 칸 하나(`PlayerArea`)만 책임진다. 게임은 풀었을 때 `onSolved()`만 호출한다. own 게임(ADR-009)은 경기 화면 전체(`Match`)를 맡고 셸의 메뉴·설정(인원·이름)·`PlayLayout`·`TopBar`만 빌린다.
   ```ts
-  type GameModule = {
-    id: string; name: string; description: string; minPlayers: number; maxPlayers: number;
-    PlayerArea: React.FC<{ difficulty: Difficulty; seed: number; active: boolean; onSolved: () => void }>;
-    Icon?: React.FC;  // 메뉴 카드에 곁들이는 작은 그림 (없어도 된다)
-  };
+  type GameInfo = { id; name; description; minPlayers; maxPlayers; Icon?; hidden? };
+  type PuzzleGame = GameInfo & { kind?: 'puzzle'; PlayerArea: React.FC<PlayerAreaProps>; … };
+  type OwnMatchGame = GameInfo & { kind: 'own'; Match: React.FC<{ playerNames; seed; onExit; onReplay }> };
+  type GameModule = PuzzleGame | OwnMatchGame;
   ```
-  턴제 등 이 계약에 맞지 않는 게임은 그 게임을 추가할 때 셸을 확장한다.
+  둘 다 맞지 않는 게임은 그 게임을 추가할 때 셸을 확장한다.
 - **로직/UI 분리**: 규칙은 `logic/`의 순수 함수(React·DOM 의존 금지)로, UI는 `ui/`의 React 컴포넌트로 둔다. 로직은 Vitest로 TDD 한다.
 - **시드 기반 재현성**: 퍼즐은 `createRng(seed)`로 생성한다. 플레이어별 시드는 `deriveSeed(gameSeed, round, playerIndex)`.
 
@@ -92,6 +106,7 @@ PlayerSetup ─(MatchConfig)→ matchReducer ─(라운드·시드·active)→ P
                        START_ROUND / SOLVED(player, now)  PlayerArea × N (각 칸 독립)
                        TIME_UP / NEXT_ROUND  ←───────── onSolved() ──┘
 matchReducer ─(roundPoints, 총점)→ 라운드 결과(Match 안) / FinalResult
+own 게임: PlayerSetup ─(인원·이름)→ App → game.Match(playerNames, seed)
 ```
 
 ## 상태 관리
