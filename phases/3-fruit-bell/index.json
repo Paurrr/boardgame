@@ -21,7 +21,9 @@
     {
       "step": 2,
       "name": "bell-press",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-25T18:35:19+0900",
+      "summary": "src/games/bell/logic/press.ts: Press·PressDecision, pressDown(같은 pointerId는 지우고 끝에 새로)·pressUp(없으면 같은 내용)·decide(downAt 안정 정렬, 첫 대기면 wait·첫 톡이면 ring, 오래 누름·움직임 제외)·isWaiting. isTap·TAP_MAX_DURATION_MS 사용, 시계 호출 없음. 테스트 13개"
     },
     {
       "step": 3,
