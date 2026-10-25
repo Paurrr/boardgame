@@ -5,7 +5,9 @@
     {
       "step": 0,
       "name": "pairs-rules",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-25T21:46:35+0900",
+      "summary": "pairs/logic: types.ts(Slot·PairsState·PairsAction·Standing), level.ts(PAIRS_LEVELS·PICTURE_COUNT 24·cardCount), game.ts(createPairsGame·pairsReducer·isOver·standings). 무시되는 동작은 같은 객체, match는 차례 유지, miss는 (turn+1)%playerCount"
     },
     {
       "step": 1,
@@ -32,5 +34,6 @@
       "name": "docs-rules",
       "status": "pending"
     }
-  ]
+  ],
+  "created_at": "2026-10-25T21:46:35+0900"
 }
