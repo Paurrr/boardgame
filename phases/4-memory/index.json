@@ -15,7 +15,8 @@
       "name": "pairs-pictures",
       "status": "completed",
       "started_at": "2026-10-25T21:49:12+0900",
-      "summary": "pairs/ui: pictures.tsx(PICTURE_IDS 24·Picture·PictureShape=testid 없는 모양), Card.tsx(FLIP_MS 250, Card: 빈자리·뒷면·앞면 testid, faceUp 바뀌면 DOM 면은 즉시 바뀌고 scaleX 1→0→1, 앞 절반은 이전 면 덮개), Card.module.css(그림 선 클래스), MenuIcon(고래 앞면 2+뒷면 1)"
+      "summary": "pairs/ui: pictures.tsx(PICTURE_IDS 24·Picture·PictureShape=testid 없는 모양), Card.tsx(FLIP_MS 250, Card: 빈자리·뒷면·앞면 testid, faceUp 바뀌면 DOM 면은 즉시 바뀌고 scaleX 1→0→1, 앞 절반은 이전 면 덮개), Card.module.css(그림 선 클래스), MenuIcon(고래 앞면 2+뒷면 1)",
+      "completed_at": "2026-10-25T21:59:42+0900"
     },
     {
       "step": 2,
