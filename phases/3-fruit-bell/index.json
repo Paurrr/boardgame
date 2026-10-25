@@ -13,7 +13,9 @@
     {
       "step": 1,
       "name": "bell-rules",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-25T18:31:19+0900",
+      "summary": "src/games/bell/logic: types.ts(Fruit·Card·Pile·RingResult·BellState·BellAction), cards.ts(FRUITS·COPIES·makeDeck·deal·fruitTotals·hasFive), game.ts(createBellGame·topCards·isOut·bellReducer·ranking). 무시되는 동작은 같은 객체, 탈락자 펼친 카드도 합·수거, 틀린 종은 p+1부터 한 장씩, 남은 1명이면 winner. 테스트 29개"
     },
     {
       "step": 2,
