@@ -7,7 +7,8 @@
       "name": "docs-rules",
       "status": "completed",
       "started_at": "2026-10-25T18:26:25+0900",
-      "summary": "문서만 수정: ADR-009(원작 규칙·칸마다 종·톡 판정 timeStamp 순·GameModule=PuzzleGame|OwnMatchGame·hidden), ARCHITECTURE에 src/games/bell 트리·합집합 계약·own 데이터 흐름, PRD 7번, UI_GUIDE 과일 종치기 절(과일 색·카드·버튼·종·애니메이션 예외). 순증 2,469자"
+      "summary": "문서만 수정: ADR-009(원작 규칙·칸마다 종·톡 판정 timeStamp 순·GameModule=PuzzleGame|OwnMatchGame·hidden), ARCHITECTURE에 src/games/bell 트리·합집합 계약·own 데이터 흐름, PRD 7번, UI_GUIDE 과일 종치기 절(과일 색·카드·버튼·종·애니메이션 예외). 순증 2,469자",
+      "completed_at": "2026-10-25T18:31:18+0900"
     },
     {
       "step": 1,
