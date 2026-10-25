@@ -9,6 +9,10 @@
       "dir": "2-stack-puzzle",
       "status": "completed",
       "completed_at": "2026-10-24T22:06:20+0900"
+    },
+    {
+      "dir": "3-fruit-bell",
+      "status": "pending"
     }
   ]
 }

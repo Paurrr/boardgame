@@ -1,0 +1,41 @@
+{
+  "project": "우리집 보드게임",
+  "phase": "3-fruit-bell",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-rules",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "bell-rules",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "bell-press",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "shell-own-match",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "bell-cards",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "bell-lane",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "bell-match",
+      "status": "pending"
+    }
+  ]
+}

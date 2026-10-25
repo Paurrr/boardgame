@@ -1,0 +1,116 @@
+# Step 1: bell-rules
+
+## 읽어야 할 파일
+
+먼저 아래 파일들을 읽고 프로젝트의 아키텍처와 설계 의도를 파악하라:
+
+- /CLAUDE.md, /docs/ARCHITECTURE.md, /docs/ADR.md (ADR-009), /docs/UI_GUIDE.md
+- /docs/superpowers/specs/2026-10-25-fruit-bell-design.md
+- /docs/superpowers/plans/2026-10-25-fruit-bell.md (전체 계획. 이 step은 Task 1)
+- `/phases/3-fruit-bell/index.json`의 앞선 step summary로 이미 만들어진 것을 확인
+- /src/lib/random.ts
+
+이전 step에서 만들어진 코드를 꼼꼼히 읽고, 설계 의도를 이해한 뒤 작업하라.
+
+## 공통 제약 (모든 step)
+
+- 칠판 Chrome 99. CSS nesting·container query·`:has()`·`oklch()/color-mix()` 금지. JS는 ES2022까지(`toSorted` 등 금지, 정렬은 `slice().sort()`). 폴리필 없음.
+- 게임 규칙·진행 로직(`src/games/*/logic`, `src/shell/logic`)은 React/DOM 의존 금지. `src/games/bell/ui/notice.ts`도 순수 TS로 쓴다.
+- TDD: 테스트를 먼저 쓰고 실패를 확인한 뒤 구현한다. 커밋은 conventional commits다(execute.py가 단계마다 커밋한다).
+- 색은 `src/styles.css`의 `:root` 변수만 쓴다. 과일 색은 1탄 `src/games/blocks/logic/pieces.ts`의 `PIECES`에서 가져온다: 딸기←`I3`(#D9442E), 바나나←`L3`(#F2B53A), 라임←`L5`(#8DBB2E), 블루베리←`U5`(#22507C), 잎·꼭지←`T4`(#2E9E55). 그림자·글로우·그라데이션·필터 금지. 두께는 아래 테두리로 낸다.
+- 공개 명칭은 "과일 종치기", id는 `bell`이다. 원작 이름("할리갈리")·원작 그림은 화면 글자·파일·식별자에 쓰지 않는다.
+- 플레이어 칸은 가로로 나란히 둔다. 조작 요소(뒤집기·종)는 칸의 아래쪽 2/3에만 둔다. 누르는 요소는 56 CSS px 이상, 주요 버튼은 72 CSS px 이상. 칸 아래 여백 1.5rem 이상. 칠판(1280×720) 4명에서 스크롤 없이 들어가야 한다.
+- 터치는 Pointer Events. 칸 안 버튼은 `pointerdown`에 반응한다. 멀티터치 판단에 `navigator.maxTouchPoints`를 쓰지 않는다.
+- 숫자: 카드 56장 = 과일 4가지 × (1개 5장, 2개 3장, 3개 3장, 4개 2장, 5개 1장). 인원 2~4명. 톡 기준은 `src/lib/gesture.ts`의 `isTap`(300ms 미만·10px 미만). 결과 표시 1500ms, 끝난 뒤 결과 화면까지 1500ms.
+
+## 작업
+
+**Files:**
+- Create: `src/games/bell/logic/types.ts`, `src/games/bell/logic/cards.ts`, `src/games/bell/logic/game.ts`
+- Test: `src/games/bell/logic/cards.test.ts`, `src/games/bell/logic/game.test.ts`
+
+**Interfaces:**
+- Produces (`types.ts`):
+  ```ts
+  export type Fruit = 'strawberry' | 'banana' | 'lime' | 'blueberry';
+  export type FruitCount = 1 | 2 | 3 | 4 | 5;
+  export type Card = { fruit: Fruit; count: FruitCount };
+  /** down[0]이 다음에 뒤집을 카드, up의 마지막이 보이는 카드 */
+  export type Pile = { down: Card[]; up: Card[] };
+  export type RingResult =
+    | { kind: 'correct'; player: number; gained: number }
+    | { kind: 'wrong'; player: number; paidTo: number[] };
+  export type BellState = {
+    piles: Pile[];
+    turn: number;
+    /** 탈락한 순서 */
+    outOrder: number[];
+    /** 마지막 한 명. 끝나기 전에는 null */
+    winner: number | null;
+    /** 결과를 보여 주는 동안 null이 아니고, 그동안 FLIP·RING을 무시한다 */
+    lastRing: RingResult | null;
+  };
+  export type BellAction = { type: 'FLIP'; player: number } | { type: 'RING'; player: number } | { type: 'CONTINUE' };
+  ```
+- Produces (`cards.ts`): `FRUITS: readonly Fruit[]`(위 순서), `COPIES: Record<FruitCount, number>` = `{1: 5, 2: 3, 3: 3, 4: 2, 5: 1}`, `makeDeck(): Card[]`, `deal(cards: readonly Card[], playerCount: number): Card[][]`, `fruitTotals(tops: readonly (Card | null)[]): Record<Fruit, number>`, `hasFive(tops: readonly (Card | null)[]): boolean`
+- Produces (`game.ts`): `createBellGame(playerCount: number, seed: number): BellState`, `topCards(state: BellState): (Card | null)[]`, `isOut(state: BellState, player: number): boolean`, `bellReducer(state: BellState, action: BellAction): BellState`, `ranking(state: BellState): number[]`
+- Consumes: `createRng(seed).shuffle`(`src/lib/random.ts`)
+
+규칙 (설계서 §4):
+- `deal`: i번째 카드는 `i % playerCount`번 플레이어에게 간다. 받은 순서가 그대로 `down` 순서다(3명이면 19·19·18장).
+- `createBellGame`: `deal(createRng(seed).shuffle(makeDeck()), n)`, `up`은 빈 배열, `turn` 0. n이 2~4가 아니면 `RangeError`.
+- `FLIP(p)`: `lastRing`·`winner`가 null이고 `p === turn`일 때만. `down[0]`을 `up` 끝으로 옮긴다. `down`이 비면 p는 즉시 탈락(`outOrder`에 추가). `turn`은 p 다음 자리부터 돌며 탈락하지 않은 첫 사람.
+- `RING(p)`: `lastRing`·`winner`가 null이고 p가 탈락하지 않았을 때만.
+  - `hasFive(topCards)`면 맞음: 모든 자리(0번부터, 탈락자 포함)의 `up`을 순서대로 이어 p의 `down` 끝에 붙이고 `up`을 모두 비운다. `turn = p`. `lastRing = { kind: 'correct', player: p, gained }`.
+  - 아니면 틀림: p+1번 자리부터 돌며 탈락하지 않은 다른 사람마다 p의 `down[0]`을 그 사람 `down` 끝으로 준다(p의 카드가 떨어지면 멈춤). 받은 사람을 `paidTo`에 순서대로. p의 `down`이 비면 즉시 탈락하고, 그때 `turn === p`였으면 다음 사람으로 넘긴다.
+- 탈락하지 않은 사람이 한 명이 되면 `winner`를 그 사람으로 한다.
+- `CONTINUE`: `lastRing = null`. 그 밖의 무시되는 동작은 **같은 객체**를 돌려준다(`toBe`로 검사).
+- `ranking`: `winner`(있으면) → 아직 남은 사람(자리 순) → `outOrder`를 거꾸로.
+
+- [ ] **Step 1: 실패 테스트** — 상태는 테스트 안에서 `BellState` 객체를 직접 만들어 쓴다.
+  - `cards.test.ts`
+    - `makeDeck()`은 56장, 과일마다 14장, 과일마다 개수별 장수가 `COPIES`와 같고 과일 수 합은 33이다.
+    - `deal(makeDeck(), 2|3|4)`의 장수는 `[28, 28]`·`[19, 19, 18]`·`[14, 14, 14, 14]`이고 모두 합치면 원래 카드와 같다.
+    - `hasFive`: `[바나나2, 바나나3, null]` true, `[바나나2, 바나나4]` false(6), `[라임5]` true, `[라임2, 딸기3]` false, `[]` false.
+  - `game.test.ts`
+    - `createBellGame(3, 42)`: `down` 장수 `[19, 19, 18]`, `turn` 0, 같은 시드면 `toEqual`. `createBellGame(1, 1)`·`(5, 1)`은 throw.
+    - 차례 아닌 사람의 FLIP은 같은 객체. FLIP하면 그 사람 `down`이 1장 줄고 `up` 끝이 이전 `down[0]`, `turn`이 다음 사람.
+    - `turn`은 탈락자를 건너뛴다.
+    - 맞는 RING: 펼친 카드 수만큼 `gained`, 모든 `up`이 비고 친 사람 `down` 끝에 붙고, `turn`이 친 사람.
+    - 틀린 RING(3명, 1번이 침): 1번 `down` −2, 2번·0번 끝에 한 장씩, `paidTo` `[2, 0]`.
+    - 카드가 1장인 사람이 3명 앞에서 틀리면 한 명에게만 주고 즉시 탈락한다.
+    - 마지막 카드를 뒤집으면 즉시 탈락하고, 그 카드는 `topCards`에 남는다.
+    - `탈락한 사람의 펼친 카드도 합에 들어가고 그 사람의 입력은 무시한다` (Review Focus 3): 탈락자 카드 바나나2 + 남은 사람 바나나3이면 맞는 RING이 되고 탈락자 `up`도 가져간다. 탈락자의 RING·FLIP은 같은 객체.
+    - `lastRing`이 있으면 FLIP·RING은 같은 객체, CONTINUE 뒤에는 다시 된다.
+    - 2명에서 한 명이 마지막 카드를 뒤집으면 `winner`가 다른 사람. `winner`가 있으면 FLIP·RING은 같은 객체.
+    - `ranking`: `outOrder [2, 0]`, `winner 1` → `[1, 0, 2]`.
+- [ ] **Step 2: 실패 확인** — `npx vitest run src/games/bell` → FAIL
+- [ ] **Step 3: 구현** — 위 규칙대로. 상태는 바꾸지 말고 새 객체를 만든다(reducer).
+- [ ] **Step 4: 통과 확인** — `npm run test && npm run lint && npm run build`
+
+**금지:** 화면 문구·시간(1500ms 등)을 logic에 넣지 마라. 이유: 표시는 ui의 몫이고 logic은 규칙만 다룬다.
+
+## Acceptance Criteria
+
+```bash
+npm run lint && npm run test && npm run build
+```
+
+## 검증 절차
+
+1. 위 AC 커맨드를 실행한다.
+2. 아키텍처 체크리스트를 확인한다:
+   - ARCHITECTURE.md 디렉토리 구조를 따르는가?
+   - ADR(특히 ADR-006 Chrome 99, ADR-009)을 벗어나지 않았는가?
+   - CLAUDE.md CRITICAL 규칙을 위반하지 않았는가? (순수 로직에 React/DOM import 없음, ES2023+ API 없음, 하드코딩 색·그림자·그라데이션 없음)
+3. 결과에 따라 `phases/3-fruit-bell/index.json`의 step 1을 업데이트한다:
+   - 성공 → `"status": "completed"`, `"summary": "산출물 한 줄 요약"` (만든 파일·export 이름·핵심 결정만, **300자 이내**. 이유: summary가 다음 step 프롬프트에 쌓이는데 Windows 명령줄 길이 제한이 약 32k자다)
+   - 수정 3회 시도 후에도 실패 → `"status": "error"`, `"error_message": "구체적 에러 내용"`
+   - 사용자 개입 필요 → `"status": "blocked"`, `"blocked_reason": "구체적 사유"` 후 즉시 중단
+
+## 금지사항
+
+- 이 step의 Files 목록 밖 모듈을 고치지 마라. 이유: step마다 한 레이어만 다룬다.
+- 기존 테스트를 지우거나 skip하지 마라. 기존 테스트를 깨뜨리지 마라.
+- 테스트보다 구현을 먼저 쓰지 마라. 이유: CLAUDE.md TDD 규칙.
+- 위 작업 절의 "금지" 항목을 지켜라.
