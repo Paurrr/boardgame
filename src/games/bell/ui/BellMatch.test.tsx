@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Difficulty } from '../../../lib/difficulty';
 import { isMuted, setMuted, sounds } from '../../../lib/sound';
+import { memoryStore } from '../../../lib/storage';
 import { hasFive } from '../logic/cards';
 import { bellReducer, createBellGame, topCards } from '../logic/game';
 import { BellMatch, END_SHOW_MS, RING_SHOW_MS } from './BellMatch';
@@ -13,7 +14,14 @@ function renderMatch(names: readonly string[] = NAMES, seed = 1, level: Difficul
   const onExit = vi.fn();
   const onReplay = vi.fn();
   const utils = render(
-    <BellMatch playerNames={names} seed={seed} level={level} onExit={onExit} onReplay={onReplay} />,
+    <BellMatch
+      playerNames={names}
+      seed={seed}
+      level={level}
+      store={memoryStore()}
+      onExit={onExit}
+      onReplay={onReplay}
+    />,
   );
   return { ...utils, onExit, onReplay };
 }

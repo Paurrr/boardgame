@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { Difficulty } from '../lib/difficulty';
+import type { KeyValueStore } from '../lib/storage';
 
 /** 셸이 플레이어 칸 하나에 넘겨주는 값. seed가 바뀌면 셸이 key로 다시 마운트한다 */
 export type PlayerAreaProps = {
@@ -40,6 +41,8 @@ export type OwnMatchProps = {
   seed: number;
   /** 판 전체 난이도. levels가 없는 게임은 쓰지 않아도 된다 */
   level: Difficulty;
+  /** 셸의 저장소 (1인 최고기록 등). 쓰지 않는 게임은 받기만 한다 */
+  store: KeyValueStore;
   onExit: () => void;
   onReplay: () => void;
 };

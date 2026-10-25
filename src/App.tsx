@@ -46,6 +46,7 @@ export default function App() {
             playerNames={screen.config.players.map((p) => p.name)}
             seed={screen.seed}
             level={screen.level}
+            store={store}
             onExit={() => setScreen({ kind: 'menu' })}
             onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
           />

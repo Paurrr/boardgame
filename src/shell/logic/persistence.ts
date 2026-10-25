@@ -10,6 +10,7 @@ const SETUP_KEY = 'boardgame.setup.v1';
 /** 게임마다 따로 둔다. 블록 퍼즐은 예전 키 boardgame.blocks.best.v1 그대로다 */
 const bestKey = (gameId: string) => `boardgame.${gameId}.best.v1`;
 
+/** 난이도별 최고기록. 작을수록 좋은 값(퍼즐은 ms, 짝 맞추기는 뒤집기 횟수) */
 export type BestTimes = Partial<Record<Difficulty, number>>;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -76,7 +77,7 @@ export function loadBestTimes(store: KeyValueStore, gameId: string): BestTimes {
   return out;
 }
 
-/** 1인 모드 한 문제 기록. 최고기록을 깼으면 저장하고 true */
+/** 1인 모드 기록 하나(작을수록 좋은 값: 퍼즐은 ms, 짝 맞추기는 뒤집기 횟수). 최고기록을 깼으면 저장하고 true */
 export function recordBestTime(store: KeyValueStore, gameId: string, difficulty: Difficulty, ms: number): boolean {
   if (!isFinite(ms) || ms <= 0) return false;
   const best = loadBestTimes(store, gameId);

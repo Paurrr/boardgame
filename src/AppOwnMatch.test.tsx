@@ -5,9 +5,10 @@ import type { OwnMatchGame, OwnMatchProps } from './games/types';
 
 // 경기 화면을 통째로 맡는 게임(own)이 셸에서 이어지는지 보려고 등록 목록에 가짜 게임 하나를 더한다
 const { ownGame } = vi.hoisted(() => {
-  function FakeMatch({ playerNames, seed, level, onExit, onReplay }: OwnMatchProps) {
+  function FakeMatch({ playerNames, seed, level, store, onExit, onReplay }: OwnMatchProps) {
+    const hasStore = typeof store?.setItem === 'function' && typeof store?.getItem === 'function';
     return (
-      <div data-testid="own-match" data-seed={seed} data-level={level}>
+      <div data-testid="own-match" data-seed={seed} data-level={level} data-has-store={String(hasStore)}>
         {playerNames.join(',')}
         <button type="button" onClick={onExit}>
           나가기
@@ -50,6 +51,11 @@ describe('App (경기 화면을 맡는 게임)', () => {
   it('메뉴 → 설정 → 시작하면 게임의 경기 화면에 플레이어 이름을 넘긴다', () => {
     startOwnMatch();
     expect(screen.getByTestId('own-match')).toHaveTextContent('플레이어 1,플레이어 2');
+  });
+
+  it('경기 화면에 셸의 저장소를 넘긴다 (1인 기록용)', () => {
+    startOwnMatch();
+    expect(screen.getByTestId('own-match')).toHaveAttribute('data-has-store', 'true');
   });
 
   it('판 난이도는 처음에 보통이고, 고른 난이도를 경기 화면에 넘기고 다음에도 기억한다', () => {
