@@ -1,0 +1,221 @@
+/* 칸 위쪽: 이름 줄 아래로 펼친 카드가 남은 높이를 채운다 */
+.head {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.nameLine {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+}
+
+.chip {
+  flex: 0 0 auto;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-right: 0.5rem;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+}
+
+.name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.turn,
+.out {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.turn {
+  color: var(--accent);
+}
+
+.out {
+  color: var(--ink-faint);
+}
+
+.card,
+.cardIn {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-top: 0.4rem;
+}
+
+/* 새 카드 등장 (UI_GUIDE 과일 종치기 예외) */
+.cardIn {
+  animation: card-in 180ms ease-out;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 칸 아래쪽: 알림 줄 · 뒤집기 · 종. 칠판 아래 가장자리는 터치가 둔해 아래 여백을 넉넉히 */
+.body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 0.5rem 0.8rem 1.8rem;
+}
+
+/* 알림이 없어도 같은 높이를 차지해 칸이 흔들리지 않게 */
+.notice {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.noticeOk {
+  color: var(--ok);
+}
+
+.noticeWarn {
+  color: var(--warn);
+}
+
+/* 뒤집기: 나무 블록 (그림자 대신 두꺼운 아래 테두리) */
+.flip,
+.flipOff {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 15rem;
+  height: 4rem;
+  min-height: 72px;
+  padding: 0 0.8rem;
+  border: 3px solid var(--ink);
+  border-bottom-width: 0.4rem;
+  border-radius: 14px;
+  font-weight: bold;
+}
+
+.flip {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* 눌림: 아래 두께가 얇아진 만큼 위 여백을 늘려 바닥은 제자리, 면만 내려간다 */
+.flip:active {
+  margin-top: 0.25rem;
+  height: 3.75rem;
+  border-bottom-width: 0.15rem;
+}
+
+.flipOff {
+  background: var(--off);
+  border-color: var(--off-edge);
+  color: var(--ink-soft);
+}
+
+.flipLabel {
+  margin-right: 0.6rem;
+  font-size: 1.4rem;
+}
+
+.count,
+.countGained {
+  display: inline-block;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 카드를 가져간 사람의 장수 (UI_GUIDE 과일 종치기 예외) */
+.countGained {
+  animation: count-pop 300ms ease-out;
+}
+
+@keyframes count-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+/* 종: 둥근 나무 블록 위에 종 그림과 라벨 */
+.bell {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 7.5rem;
+  height: 7.5rem;
+  min-width: 120px;
+  min-height: 120px;
+  padding: 0;
+  border: 4px solid var(--ink);
+  border-bottom-width: 0.5rem;
+  border-radius: 50%;
+  background: var(--panel);
+  font-weight: bold;
+}
+
+.bell:active {
+  margin-top: 0.25rem;
+  height: 7.25rem;
+  border-bottom-width: 0.25rem;
+}
+
+.bell:disabled {
+  opacity: 0.4;
+}
+
+.bellIcon {
+  display: block;
+  width: 62%;
+  height: auto;
+}
+
+.bellFace {
+  fill: var(--pressed);
+  stroke: var(--ink);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+.bellText {
+  margin-top: 0.2rem;
+  font-size: 1.4rem;
+  line-height: 1;
+}
