@@ -37,6 +37,8 @@ describe('sound', () => {
       sounds.go();
       sounds.solved();
       sounds.timeUp();
+      sounds.ding();
+      sounds.buzz();
     }).not.toThrow();
   });
 
@@ -53,6 +55,17 @@ describe('sound', () => {
     unlockAudio();
     sounds.solved();
     expect(FakeAudioContext.oscillators).toBe(2);
+  });
+
+  it('종이 맞으면 땡 소리 두 겹, 틀리면 낮은 소리 한 번', async () => {
+    w.AudioContext = FakeAudioContext;
+    const { sounds, unlockAudio } = await import('./sound');
+    unlockAudio();
+    sounds.ding();
+    expect(FakeAudioContext.oscillators).toBe(2);
+    FakeAudioContext.oscillators = 0;
+    sounds.buzz();
+    expect(FakeAudioContext.oscillators).toBe(1);
   });
 
   it('음소거하면 소리를 내지 않는다', async () => {

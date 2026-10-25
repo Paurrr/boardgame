@@ -1,0 +1,12 @@
+/* 위쪽 막대 아래로 플레이어 칸이 남은 높이를 채운다 */
+.match {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.play {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
