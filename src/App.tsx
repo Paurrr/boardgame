@@ -32,22 +32,32 @@ export default function App() {
       {screen.kind === 'setup' && (
         <PlayerSetup
           game={screen.game}
-          initial={loadSetup(store) ?? defaultSetup(screen.game)}
+          initial={loadSetup(store) ?? (screen.game.kind === 'own' ? defaultSetup() : defaultSetup(screen.game))}
           onBack={() => setScreen({ kind: 'menu' })}
           onStart={(setup) => startMatch(screen.game, setup)}
         />
       )}
-      {screen.kind === 'match' && (
-        <Match
-          key={screen.seed}
-          game={screen.game}
-          config={screen.config}
-          seed={screen.seed}
-          store={store}
-          onExit={() => setScreen({ kind: 'menu' })}
-          onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
-        />
-      )}
+      {/* 경기 화면을 맡는 게임은 이름만 받아 스스로 진행하고, 퍼즐 게임은 셸의 라운드·시계·점수로 진행한다 */}
+      {screen.kind === 'match' &&
+        (screen.game.kind === 'own' ? (
+          <screen.game.Match
+            key={screen.seed}
+            playerNames={screen.config.players.map((p) => p.name)}
+            seed={screen.seed}
+            onExit={() => setScreen({ kind: 'menu' })}
+            onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
+          />
+        ) : (
+          <Match
+            key={screen.seed}
+            game={screen.game}
+            config={screen.config}
+            seed={screen.seed}
+            store={store}
+            onExit={() => setScreen({ kind: 'menu' })}
+            onReplay={() => setScreen({ ...screen, seed: randomSeed() })}
+          />
+        ))}
     </div>
   );
 }

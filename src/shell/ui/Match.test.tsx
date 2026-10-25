@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameModule, PlayerAreaProps } from '../../games/types';
+import type { PlayerAreaProps, PuzzleGame } from '../../games/types';
 import { memoryStore } from '../../lib/storage';
 import type { MatchConfig } from '../logic/match';
 import { loadBestTimes } from '../logic/persistence';
@@ -16,7 +16,7 @@ function StubArea({ active, onSolved }: PlayerAreaProps) {
   );
 }
 
-const stubGame: GameModule = {
+const stubGame: PuzzleGame = {
   id: 'stub',
   name: '시험용',
   description: '',

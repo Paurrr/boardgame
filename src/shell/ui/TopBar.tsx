@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { canFullscreen, toggleFullscreen } from '../../lib/fullscreen';
 import styles from './Match.module.css';
 
+/** 라운드 글자는 round·rounds가 둘 다 있을 때만, 시계는 clock이 있을 때만 그린다 */
 type Props = {
-  round: number;
-  rounds: number;
-  clock: string;
+  round?: number;
+  rounds?: number;
+  clock?: string;
   /** 시계 앞에 붙이는 작은 글자 (예: 판 전체) */
   clockLabel?: string;
-  urgent: boolean;
+  urgent?: boolean;
   muted: boolean;
   onToggleMute: () => void;
   onExit: () => void;
@@ -28,11 +29,15 @@ export function TopBar({ round, rounds, clock, clockLabel, urgent, muted, onTogg
 
   return (
     <header className={styles.topBar}>
-      <span className={styles.round}>{`라운드 ${round}/${rounds}`}</span>
-      {clockLabel && <span className={styles.clockLabel}>{clockLabel}</span>}
-      <span className={urgent ? styles.clockUrgent : styles.clock} data-testid="clock">
-        {clock}
-      </span>
+      {round !== undefined && rounds !== undefined && (
+        <span className={styles.round}>{`라운드 ${round}/${rounds}`}</span>
+      )}
+      {clock !== undefined && clockLabel && <span className={styles.clockLabel}>{clockLabel}</span>}
+      {clock !== undefined && (
+        <span className={urgent ? styles.clockUrgent : styles.clock} data-testid="clock">
+          {clock}
+        </span>
+      )}
       <span className={styles.spacer} />
       <button type="button" className="btn" onClick={onToggleMute}>
         {muted ? '소리 켜기' : '소리 끄기'}

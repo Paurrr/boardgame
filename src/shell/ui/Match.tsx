@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
-import type { GameModule } from '../../games/types';
+import type { PuzzleGame } from '../../games/types';
 import { DIFFICULTY_LABEL } from '../../lib/difficulty';
 import { isMuted, setMuted, sounds } from '../../lib/sound';
 import type { KeyValueStore } from '../../lib/storage';
@@ -23,7 +23,7 @@ import { PlayLayout } from './PlayLayout';
 import { TopBar } from './TopBar';
 
 type Props = {
-  game: GameModule;
+  game: PuzzleGame;
   config: MatchConfig;
   seed: number;
   store: KeyValueStore;

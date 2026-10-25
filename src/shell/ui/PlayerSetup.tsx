@@ -26,13 +26,17 @@ type Props = {
 };
 
 export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
+  // 경기 화면을 맡는 게임은 인원·이름만 고른다. 라운드·시간은 저장된 값을 건드리지 않고 그대로 넘긴다
+  const puzzle = game.kind === 'own' ? null : game;
   const [players, setPlayers] = useState<PlayerConfig[]>(() => {
     const count = Math.min(game.maxPlayers, Math.max(game.minPlayers, initial.players.length));
     return resizePlayers(initial.players, count);
   });
   const [rounds, setRounds] = useState(initial.rounds);
   const [timeMode, setTimeMode] = useState<TimeMode>(initial.timeMode);
-  const [timeLimitSec, setTimeLimitSec] = useState(() => fitTimeLimit(game, initial.timeLimitSec));
+  const [timeLimitSec, setTimeLimitSec] = useState(() =>
+    puzzle ? fitTimeLimit(puzzle, initial.timeLimitSec) : initial.timeLimitSec,
+  );
   const [gameTimeSec, setGameTimeSec] = useState(initial.gameTimeSec);
 
   const counts: number[] = [];
@@ -73,91 +77,102 @@ export function PlayerSetup({ game, initial, onStart, onBack }: Props) {
                 maxLength={MAX_NAME_LENGTH}
                 onChange={(e) => update(i, { name: e.target.value })}
               />
-              {DIFFICULTIES.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  className="btn"
-                  aria-pressed={p.difficulty === d}
-                  onClick={() => update(i, { difficulty: d })}
-                >
-                  {DIFFICULTY_LABEL[d]}
-                </button>
-              ))}
+              {puzzle &&
+                DIFFICULTIES.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    className="btn"
+                    aria-pressed={p.difficulty === d}
+                    onClick={() => update(i, { difficulty: d })}
+                  >
+                    {DIFFICULTY_LABEL[d]}
+                  </button>
+                ))}
             </div>
           ))}
         </div>
 
         <div className={styles.how}>
-          <div className={styles.row} role="group" aria-label="라운드">
-            <span className={styles.label}>라운드</span>
-            {ROUND_OPTIONS.map((r) => (
-              <button key={r} type="button" className="btn" aria-pressed={rounds === r} onClick={() => setRounds(r)}>
-                {`${r}판`}
-              </button>
-            ))}
-          </div>
+          {puzzle && (
+            <>
+              <div className={styles.row} role="group" aria-label="라운드">
+                <span className={styles.label}>라운드</span>
+                {ROUND_OPTIONS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    className="btn"
+                    aria-pressed={rounds === r}
+                    onClick={() => setRounds(r)}
+                  >
+                    {`${r}판`}
+                  </button>
+                ))}
+              </div>
 
-          <div className={styles.row} role="group" aria-label="시간 방식">
-            <span className={styles.label}>시간</span>
-            <button
-              type="button"
-              className="btn"
-              aria-pressed={timeMode === 'round'}
-              onClick={() => setTimeMode('round')}
-            >
-              라운드마다
-            </button>
-            <button
-              type="button"
-              className="btn"
-              aria-pressed={timeMode === 'game'}
-              onClick={() => setTimeMode('game')}
-            >
-              판 전체
-            </button>
-          </div>
-
-          {timeMode === 'round' ? (
-            <div className={styles.row} role="group" aria-label="제한시간">
-              <span className={styles.label}>제한</span>
-              {timeOptionsOf(game).map((t) => (
+              <div className={styles.row} role="group" aria-label="시간 방식">
+                <span className={styles.label}>시간</span>
                 <button
-                  key={t}
                   type="button"
                   className="btn"
-                  aria-pressed={timeLimitSec === t}
-                  onClick={() => setTimeLimitSec(t)}
+                  aria-pressed={timeMode === 'round'}
+                  onClick={() => setTimeMode('round')}
                 >
-                  {`${t}초`}
+                  라운드마다
                 </button>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.row} role="group" aria-label="판 전체 시간">
-              <span className={styles.label}>전체</span>
-              <button
-                type="button"
-                className="btn"
-                aria-label="10초 줄이기"
-                disabled={gameTimeSec <= GAME_TIME_MIN_SEC}
-                onClick={() => setGameTimeSec((sec) => stepGameTime(sec, -1))}
-              >
-                −10초
-              </button>
-              <span className={styles.gameTime} data-testid="game-time">
-                {formatClock(gameTimeSec * 1000)}
-              </span>
-              <button
-                type="button"
-                className="btn"
-                aria-label="10초 늘리기"
-                disabled={gameTimeSec >= GAME_TIME_MAX_SEC}
-                onClick={() => setGameTimeSec((sec) => stepGameTime(sec, 1))}
-              >
-                +10초
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className="btn"
+                  aria-pressed={timeMode === 'game'}
+                  onClick={() => setTimeMode('game')}
+                >
+                  판 전체
+                </button>
+              </div>
+
+              {timeMode === 'round' ? (
+                <div className={styles.row} role="group" aria-label="제한시간">
+                  <span className={styles.label}>제한</span>
+                  {timeOptionsOf(puzzle).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className="btn"
+                      aria-pressed={timeLimitSec === t}
+                      onClick={() => setTimeLimitSec(t)}
+                    >
+                      {`${t}초`}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.row} role="group" aria-label="판 전체 시간">
+                  <span className={styles.label}>전체</span>
+                  <button
+                    type="button"
+                    className="btn"
+                    aria-label="10초 줄이기"
+                    disabled={gameTimeSec <= GAME_TIME_MIN_SEC}
+                    onClick={() => setGameTimeSec((sec) => stepGameTime(sec, -1))}
+                  >
+                    −10초
+                  </button>
+                  <span className={styles.gameTime} data-testid="game-time">
+                    {formatClock(gameTimeSec * 1000)}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn"
+                    aria-label="10초 늘리기"
+                    disabled={gameTimeSec >= GAME_TIME_MAX_SEC}
+                    onClick={() => setGameTimeSec((sec) => stepGameTime(sec, 1))}
+                  >
+                    +10초
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           <div className={styles.actions}>

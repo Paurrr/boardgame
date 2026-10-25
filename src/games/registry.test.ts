@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { blocksGame } from './blocks';
 import { findGame, GAMES, menuGames } from './registry';
-import type { GameModule } from './types';
+import type { GameModule, PuzzleGame } from './types';
 
 describe('registry', () => {
   it('블록 퍼즐이 1~4인 게임으로 등록돼 있다', () => {
@@ -21,7 +21,7 @@ describe('registry', () => {
   });
 
   it('쌓기 퍼즐은 1~4인, 제한시간 90/120/150초(기본 120초)로 등록돼 있다', () => {
-    const game = findGame('stack');
+    const game = findGame('stack') as PuzzleGame | undefined;
     expect(game?.name).toBe('쌓기 퍼즐');
     expect(game?.minPlayers).toBe(1);
     expect(game?.maxPlayers).toBe(4);
