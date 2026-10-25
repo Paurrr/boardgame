@@ -48,7 +48,7 @@
       "status": "completed",
       "started_at": "2026-10-25T18:46:18+0900",
       "summary": "src/games/bell/ui: notice.ts(Notice·noticeFor, 빼기 U+2212), Lane.tsx(LaneProps·LaneHead 이름·차례!/탈락·FruitCard, 새 카드는 카드 객체별 WeakMap 키로 다시 그려 180ms 등장/LaneBody 알림 줄 testid lane-notice·뒤집기 aria-disabled·종 aria-label, out이면 disabled), Lane.module.css(flip·flipOff·countGained·noticeOk·noticeWarn), 테스트 21개",
-      "completed_at": "2026-10-25T18:51:06+0900"
+      "completed_at": "2026-10-25T18:51:59+0900"
     },
     {
       "step": 6,
