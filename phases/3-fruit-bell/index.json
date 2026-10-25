@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "bell-cards",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-25T18:41:40+0900",
+      "summary": "src/games/bell/ui: FruitIcon.tsx(FRUIT_COLOR·LEAF_COLOR←PIECES, FruitIcon 크기1 모양을 translate·scale(size)), FruitCard.tsx(CARD_W·CARD_H·ICON_SIZE·PIP_LAYOUT, FruitCard: 카드 있으면 svg testid fruit-card, null이면 svg가 empty-card·점선), FruitCard.module.css(색은 :root 변수), MenuIcon(바나나2+3 겹침). 테스트 8개",
+      "completed_at": "2026-10-25T18:47:00+0900"
     },
     {
       "step": 5,
