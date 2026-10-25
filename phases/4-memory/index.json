@@ -23,7 +23,8 @@
       "name": "pairs-board",
       "status": "completed",
       "started_at": "2026-10-25T21:59:42+0900",
-      "summary": "pairs/ui: Board.tsx(BoardProps·Board: svg board, viewBox 칸100·간격8·여백16+아래두께8, 칸마다 slot g→중첩 svg Card, usePointerDrag onTap만, board-frame stroke=color·아래 같은 색 블록), TurnHeader.tsx(2명+ '이름 차례' 사람색·listitem aria-current, 1명 '찾은 짝 n/N'·'n번')"
+      "summary": "pairs/ui: Board.tsx(BoardProps·Board: svg board, viewBox 칸100·간격8·여백16+아래두께8, 칸마다 slot g→중첩 svg Card, usePointerDrag onTap만, board-frame stroke=color·아래 같은 색 블록), TurnHeader.tsx(2명+ '이름 차례' 사람색·listitem aria-current, 1명 '찾은 짝 n/N'·'n번')",
+      "completed_at": "2026-10-25T22:04:51+0900"
     },
     {
       "step": 3,
