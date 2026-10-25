@@ -1,0 +1,11 @@
+/* 부모 크기를 채우고, 카드가 정사각형으로 남게 viewBox를 가운데 맞춘다 */
+.board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.surface {
+  fill: var(--panel);
+}
