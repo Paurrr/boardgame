@@ -36,17 +36,16 @@ describe('registry', () => {
     expect(findGame('stack')?.Icon).toBeDefined();
   });
 
-  it('과일 종치기는 2~4인 own 게임이고 칠판 확인 전이라 ?dev에서만 보인다', () => {
+  it('과일 종치기는 2~4인 own 게임이고 ?dev 없이도 메뉴에 보인다', () => {
     const game = findGame('bell');
     expect(game?.name).toBe('과일 종치기');
     expect(game?.kind).toBe('own');
-    expect(game?.hidden).toBe(true);
+    expect(game?.hidden).toBeFalsy();
     expect(game?.minPlayers).toBe(2);
     expect(game?.maxPlayers).toBe(4);
     expect(game?.Icon).toBeDefined();
     expect(game?.kind === 'own' && game.levels).toEqual(LEVEL_TEXT);
-    expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('bell');
-    expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('bell');
+    expect(menuGames(GAMES, '').map((g) => g.id)).toContain('bell');
   });
 });
 
