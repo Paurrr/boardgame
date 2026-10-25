@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LEVEL_TEXT } from './bell/ui/levelText';
 import { blocksGame } from './blocks';
+import { LEVEL_TEXT as PAIRS_LEVEL_TEXT } from './pairs/ui/levelText';
 import { findGame, GAMES, menuGames } from './registry';
 import type { GameModule, PuzzleGame } from './types';
 
@@ -46,6 +47,23 @@ describe('registry', () => {
     expect(game?.Icon).toBeDefined();
     expect(game?.kind === 'own' && game.levels).toEqual(LEVEL_TEXT);
     expect(menuGames(GAMES, '').map((g) => g.id)).toContain('bell');
+  });
+
+  it('짝 맞추기는 1~4인 own 게임이고 칠판 확인 전이라 ?dev에서만 메뉴에 보인다', () => {
+    const game = findGame('pairs');
+    expect(game?.name).toBe('짝 맞추기');
+    expect(game?.kind).toBe('own');
+    expect(game?.hidden).toBe(true);
+    expect(game?.minPlayers).toBe(1);
+    expect(game?.maxPlayers).toBe(4);
+    expect(game?.Icon).toBeDefined();
+    expect(game?.kind === 'own' && game.levels).toEqual(PAIRS_LEVEL_TEXT);
+    expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('pairs');
+    expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('pairs');
+  });
+
+  it('게임은 나온 순서대로 메뉴에 놓인다', () => {
+    expect(GAMES.map((g) => g.id)).toEqual(['blocks', 'stack', 'bell', 'pairs']);
   });
 });
 

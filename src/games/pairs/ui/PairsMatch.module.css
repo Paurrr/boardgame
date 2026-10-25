@@ -1,0 +1,52 @@
+/* 위쪽 막대 아래를 위 1/3(차례 표시)과 아래 2/3(판)으로 나눈다 */
+.match {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 위쪽 1/3: 보기 전용 */
+.head {
+  flex: 1 1 0;
+  min-height: 0;
+  background: var(--panel);
+  border-bottom: 4px solid var(--ink);
+}
+
+/* 아래쪽 2/3: 판. 칠판 아래 가장자리는 터치가 둔해 판 아래로 1.5rem을 비운다 */
+.body {
+  position: relative;
+  flex: 2 1 0;
+  min-height: 0;
+}
+
+.boardBox {
+  position: absolute;
+  inset: 0 1rem 1.5rem;
+}
+
+/* 판 위에 겹쳐 띄우는 글. 누름은 아래 판으로 흘려보낸다 (막는 일은 PairsMatch가 한다) */
+.bannerLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 글자색·테두리색은 그 사람 색 (style로 받는다). 두께는 아래 테두리로 */
+.banner {
+  max-width: 90%;
+  padding: 0.6rem 2.4rem;
+  border: 6px solid;
+  border-bottom-width: 0.9rem;
+  border-radius: 18px;
+  background: var(--panel);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 5rem;
+  font-weight: bold;
+  pointer-events: none;
+}
