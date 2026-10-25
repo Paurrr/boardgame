@@ -49,17 +49,16 @@ describe('registry', () => {
     expect(menuGames(GAMES, '').map((g) => g.id)).toContain('bell');
   });
 
-  it('짝 맞추기는 1~4인 own 게임이고 칠판 확인 전이라 ?dev에서만 메뉴에 보인다', () => {
+  it('짝 맞추기는 1~4인 own 게임이고 ?dev 없이도 메뉴에 보인다', () => {
     const game = findGame('pairs');
     expect(game?.name).toBe('짝 맞추기');
     expect(game?.kind).toBe('own');
-    expect(game?.hidden).toBe(true);
+    expect(game?.hidden).toBeFalsy();
     expect(game?.minPlayers).toBe(1);
     expect(game?.maxPlayers).toBe(4);
     expect(game?.Icon).toBeDefined();
     expect(game?.kind === 'own' && game.levels).toEqual(PAIRS_LEVEL_TEXT);
-    expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('pairs');
-    expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('pairs');
+    expect(menuGames(GAMES, '').map((g) => g.id)).toContain('pairs');
   });
 
   it('게임은 나온 순서대로 메뉴에 놓인다', () => {
