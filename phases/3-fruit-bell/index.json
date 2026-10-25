@@ -31,7 +31,8 @@
       "name": "shell-own-match",
       "status": "completed",
       "started_at": "2026-10-25T18:37:10+0900",
-      "summary": "types.ts: GameModule=PuzzleGame|OwnMatchGame(kind 'own', Match에 OwnMatchProps{playerNames,seed,onExit,onReplay}). TopBar round·rounds·clock·urgent 선택. Match game은 PuzzleGame. App은 own이면 game.Match(key=seed). PlayerSetup은 own이면 난이도·라운드·시간 줄 숨기고 initial 값 그대로 넘김. registry.test 타입 단언 1줄"
+      "summary": "types.ts: GameModule=PuzzleGame|OwnMatchGame(kind 'own', Match에 OwnMatchProps{playerNames,seed,onExit,onReplay}). TopBar round·rounds·clock·urgent 선택. Match game은 PuzzleGame. App은 own이면 game.Match(key=seed). PlayerSetup은 own이면 난이도·라운드·시간 줄 숨기고 initial 값 그대로 넘김. registry.test 타입 단언 1줄",
+      "completed_at": "2026-10-25T18:41:39+0900"
     },
     {
       "step": 4,
