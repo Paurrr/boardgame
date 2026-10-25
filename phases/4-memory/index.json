@@ -1,0 +1,36 @@
+{
+  "project": "우리집 보드게임",
+  "phase": "4-memory",
+  "steps": [
+    {
+      "step": 0,
+      "name": "pairs-rules",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "pairs-pictures",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "pairs-board",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "pairs-result",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "pairs-match",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "docs-rules",
+      "status": "pending"
+    }
+  ]
+}
