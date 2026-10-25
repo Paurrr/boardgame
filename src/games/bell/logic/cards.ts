@@ -18,10 +18,14 @@ export function makeDeck(): Card[] {
   return deck;
 }
 
-/** i번째 카드는 i % playerCount번 사람에게 간다. 받은 순서가 그대로 엎은 더미 순서다 */
-export function deal(cards: readonly Card[], playerCount: number): Card[][] {
+/**
+ * i번째 카드는 i % playerCount번 사람에게 간다. 받은 순서가 그대로 엎은 더미 순서다.
+ * cardsEach가 있으면 앞에서부터 playerCount × cardsEach장만 나누고 나머지는 쓰지 않는다
+ */
+export function deal(cards: readonly Card[], playerCount: number, cardsEach: number | null = null): Card[][] {
+  const used = cardsEach === null ? cards : cards.slice(0, playerCount * cardsEach);
   const hands: Card[][] = Array.from({ length: playerCount }, () => []);
-  cards.forEach((card, i) => hands[i % playerCount].push(card));
+  used.forEach((card, i) => hands[i % playerCount].push(card));
   return hands;
 }
 

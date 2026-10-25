@@ -20,6 +20,8 @@ export type BellState = {
   winner: number | null;
   /** 결과를 보여 주는 동안 null이 아니고, 그동안 FLIP·RING을 무시한다 */
   lastRing: RingResult | null;
+  /** 판 전체에서 뒤집힌 장수. 차례 제한시간이 이것으로 빨라진다 */
+  flips: number;
 };
 
 export type BellAction = { type: 'FLIP'; player: number } | { type: 'RING'; player: number } | { type: 'CONTINUE' };

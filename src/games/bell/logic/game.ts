@@ -1,18 +1,22 @@
+import type { Difficulty } from '../../../lib/difficulty';
 import { createRng } from '../../../lib/random';
 import { deal, hasFive, makeDeck } from './cards';
+import { BELL_LEVELS } from './level';
 import type { BellAction, BellState, Card } from './types';
 
-export function createBellGame(playerCount: number, seed: number): BellState {
+/** level은 사람당 카드 장수만 정한다. 기본 쉬움은 원작처럼 전부 나눈다 */
+export function createBellGame(playerCount: number, seed: number, level: Difficulty = 'easy'): BellState {
   if (!Number.isInteger(playerCount) || playerCount < 2 || playerCount > 4) {
     throw new RangeError(`인원은 2~4명이어야 합니다: ${playerCount}`);
   }
-  const hands = deal(createRng(seed).shuffle(makeDeck()), playerCount);
+  const hands = deal(createRng(seed).shuffle(makeDeck()), playerCount, BELL_LEVELS[level].cardsEach);
   return {
     piles: hands.map((down) => ({ down, up: [] })),
     turn: 0,
     outOrder: [],
     winner: null,
     lastRing: null,
+    flips: 0,
   };
 }
 
@@ -57,6 +61,7 @@ function flip(state: BellState, player: number): BellState {
     outOrder,
     turn: nextPlayer(n, outOrder, player),
     winner: lastOneLeft(n, outOrder),
+    flips: state.flips + 1,
   };
 }
 

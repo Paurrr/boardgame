@@ -39,6 +39,19 @@ describe('deal', () => {
     expect(keys(hands.flat())).toEqual(keys(deck));
   });
 
+  it('사람당 장수를 정하면 앞에서부터 인원 × 장수만 나누고 나머지는 쓰지 않는다', () => {
+    const deck = makeDeck();
+    const hands = deal(deck, 4, 8);
+    expect(hands.map((h) => h.length)).toEqual([8, 8, 8, 8]);
+    expect(hands.flat()).toHaveLength(32);
+    expect(hands[0][0]).toBe(deck[0]);
+    expect(hands[3][7]).toBe(deck[31]);
+  });
+
+  it('사람당 장수가 null이면 전부 나눈다', () => {
+    expect(deal(makeDeck(), 3, null).map((h) => h.length)).toEqual([19, 19, 18]);
+  });
+
   it('i번째 카드는 i % 인원번 사람에게 받은 순서대로 간다', () => {
     const cards = [card('lime', 1), card('lime', 2), card('lime', 3), card('lime', 4), card('lime', 5)];
     expect(deal(cards, 2)).toEqual([

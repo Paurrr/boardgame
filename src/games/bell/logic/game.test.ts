@@ -21,6 +21,7 @@ const state = (piles: Pile[], over: Partial<BellState> = {}): BellState => ({
   outOrder: [],
   winner: null,
   lastRing: null,
+  flips: 0,
   ...over,
 });
 const flip = (s: BellState, player: number) => bellReducer(s, { type: 'FLIP', player });
@@ -41,6 +42,14 @@ describe('createBellGame', () => {
     expect(createBellGame(3, 42)).toEqual(createBellGame(3, 42));
   });
 
+  it('난이도에 따라 사람당 카드를 덜 나눈다 (기본은 쉬움 = 전부)', () => {
+    expect(createBellGame(4, 7, 'hard').piles.map((p) => p.down.length)).toEqual([8, 8, 8, 8]);
+    expect(createBellGame(2, 7, 'normal').piles.map((p) => p.down.length)).toEqual([12, 12]);
+    expect(createBellGame(2, 7, 'easy').piles.map((p) => p.down.length)).toEqual([28, 28]);
+    expect(createBellGame(2, 7)).toEqual(createBellGame(2, 7, 'easy'));
+    expect(createBellGame(2, 7, 'hard').flips).toBe(0);
+  });
+
   it('인원이 2~4명이 아니면 RangeError', () => {
     expect(() => createBellGame(1, 1)).toThrow(RangeError);
     expect(() => createBellGame(5, 1)).toThrow(RangeError);
@@ -59,6 +68,14 @@ describe('FLIP', () => {
     expect(next.piles[0]).toEqual({ down: [L2], up: [B2, S1] });
     expect(next.turn).toBe(1);
     expect(s.piles[0]).toEqual({ down: [S1, L2], up: [B2] });
+  });
+
+  it('뒤집힌 장수를 판 전체로 센다 (무시된 FLIP은 세지 않는다)', () => {
+    const s = state([pile([S1, S2]), pile([B3, B2])]);
+    const one = flip(s, 0);
+    expect(one.flips).toBe(1);
+    expect(flip(one, 0)).toBe(one);
+    expect(flip(one, 1).flips).toBe(2);
   });
 
   it('차례는 탈락한 사람을 건너뛰고 끝에서 처음으로 돈다', () => {
