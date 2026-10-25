@@ -29,9 +29,10 @@ describe('registry', () => {
     expect(game?.defaultTimeSec).toBe(120);
   });
 
-  it('쌓기 퍼즐은 칠판 확인 중이라 ?dev 없이는 메뉴에 없다', () => {
-    expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('stack');
-    expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('stack');
+  it('쌓기 퍼즐은 ?dev 없이도 메뉴에 보이고 메뉴 그림이 있다', () => {
+    expect(menuGames(GAMES, '').map((g) => g.id)).toContain('stack');
+    expect(findGame('stack')?.hidden).toBeFalsy();
+    expect(findGame('stack')?.Icon).toBeDefined();
   });
 });
 
