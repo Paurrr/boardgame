@@ -7,7 +7,8 @@
       "name": "pairs-rules",
       "status": "completed",
       "started_at": "2026-10-25T21:46:35+0900",
-      "summary": "pairs/logic: types.ts(Slot·PairsState·PairsAction·Standing), level.ts(PAIRS_LEVELS·PICTURE_COUNT 24·cardCount), game.ts(createPairsGame·pairsReducer·isOver·standings). 무시되는 동작은 같은 객체, match는 차례 유지, miss는 (turn+1)%playerCount"
+      "summary": "pairs/logic: types.ts(Slot·PairsState·PairsAction·Standing), level.ts(PAIRS_LEVELS·PICTURE_COUNT 24·cardCount), game.ts(createPairsGame·pairsReducer·isOver·standings). 무시되는 동작은 같은 객체, match는 차례 유지, miss는 (turn+1)%playerCount",
+      "completed_at": "2026-10-25T21:49:12+0900"
     },
     {
       "step": 1,
