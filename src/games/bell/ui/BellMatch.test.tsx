@@ -79,6 +79,73 @@ describe('BellMatch', () => {
     expectCounts([18, 19, 18]);
   });
 
+  it('쉬움은 위쪽 막대에 쉬움이라 적고, 10초가 지나도 저절로 뒤집지 않는다', () => {
+    renderMatch();
+    expect(screen.getByText('쉬움')).toBeInTheDocument();
+    advance(10000);
+    expect(column(0).queryByTestId('fruit-card')).toBeNull();
+    expect(column(0).queryByTestId('turn-timer')).toBeNull();
+  });
+
+  it('어려움은 사람마다 8장으로 시작한다', () => {
+    renderMatch(NAMES, 1, 'hard');
+    expectCounts([8, 8, 8]);
+    expect(screen.getByText('어려움 · 3초')).toBeInTheDocument();
+  });
+
+  it('보통에서 3초 동안 안 뒤집으면 저절로 뒤집히고, 다음 차례는 2.95초다', () => {
+    renderMatch(NAMES, 1, 'normal');
+    expectCounts([12, 12, 12]);
+    expect(screen.getByText('보통 · 3초')).toBeInTheDocument();
+    expect(column(0).getByTestId('turn-timer')).toHaveStyle({ animationDuration: '3000ms' });
+    advance(2999);
+    expect(column(0).queryByTestId('fruit-card')).toBeNull();
+    advance(1);
+    expect(column(0).getByTestId('fruit-card')).toBeInTheDocument();
+    expect(flipButton(1)).not.toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByText('보통 · 2.9초')).toBeInTheDocument();
+    expect(column(1).getByTestId('turn-timer')).toHaveStyle({ animationDuration: '2950ms' });
+    advance(2949);
+    expect(column(1).queryByTestId('fruit-card')).toBeNull();
+    advance(1);
+    expect(column(1).getByTestId('fruit-card')).toBeInTheDocument();
+  });
+
+  it('손으로 먼저 뒤집으면 다음 사람 시간을 처음부터 잰다', () => {
+    renderMatch(NAMES, 1, 'normal');
+    advance(1000);
+    flip(0);
+    advance(2949);
+    expect(column(1).queryByTestId('fruit-card')).toBeNull();
+    advance(1);
+    expect(column(1).getByTestId('fruit-card')).toBeInTheDocument();
+  });
+
+  it('종에 손가락이 닿아 판정을 기다리는 동안에는 저절로 뒤집지 않고, 판정이 끝나면 뒤집는다', () => {
+    renderMatch(NAMES, 1, 'normal');
+    advance(2900);
+    bellDown(1, 5); // 손바닥처럼 계속 누르고 있다
+    advance(250);
+    expect(column(0).queryByTestId('fruit-card')).toBeNull();
+    advance(150);
+    expect(column(0).getByTestId('fruit-card')).toBeInTheDocument();
+    expect(notice(1)).toHaveTextContent('');
+  });
+
+  it('종 결과를 보여 주는 동안에는 저절로 뒤집지 않고, 이어서 그 차례 시간을 처음부터 잰다', () => {
+    renderMatch(NAMES, 1, 'normal');
+    advance(1000);
+    tap(1); // 틀린 종
+    expect(column(0).queryByTestId('turn-timer')).toBeNull();
+    // act 하나 안에서는 effect가 끝에 돌므로 결과 표시가 끝나는 때에서 한 번 끊는다
+    advance(RING_SHOW_MS);
+    expect(column(0).queryByTestId('fruit-card')).toBeNull();
+    advance(2999);
+    expect(column(0).queryByTestId('fruit-card')).toBeNull();
+    advance(1);
+    expect(column(0).getByTestId('fruit-card')).toBeInTheDocument();
+  });
+
   it('5가 되면 먼저 톡 친 사람이 펼친 카드를 다 가져간다', () => {
     const seed = 1;
     let state = createBellGame(3, seed);

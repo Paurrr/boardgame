@@ -16,6 +16,7 @@ function props(over: Partial<LaneProps> = {}): LaneProps {
     out: false,
     notice: null,
     gained: false,
+    timerMs: null,
     onFlip: vi.fn(),
     onBellDown: vi.fn(),
     onBellUp: vi.fn(),
@@ -72,6 +73,20 @@ describe('LaneBody 뒤집기', () => {
     unmount();
     renderBody(props({ gained: false }));
     expect(screen.getByText('14장')).not.toHaveClass(styles.countGained);
+  });
+});
+
+describe('LaneBody 차례 시간 막대', () => {
+  it('timerMs가 있으면 뒤집기 버튼 안 막대가 그 시간 동안 줄어든다', () => {
+    renderBody(props({ canFlip: true, timerMs: 2400 }));
+    const bar = screen.getByTestId('turn-timer');
+    expect(flipButton()).toContainElement(bar);
+    expect(bar).toHaveStyle({ animationDuration: '2400ms' });
+  });
+
+  it('timerMs가 null이면 막대가 없다', () => {
+    renderBody(props({ canFlip: true, timerMs: null }));
+    expect(screen.queryByTestId('turn-timer')).toBeNull();
   });
 });
 

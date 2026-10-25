@@ -14,6 +14,8 @@ export type LaneProps = {
   out: boolean;
   notice: Notice | null;
   gained: boolean;
+  /** 차례 제한시간(ms). 있으면 뒤집기 버튼 안 막대가 그 시간 동안 줄어든다 */
+  timerMs: number | null;
   onFlip: (e: ReactPointerEvent) => void;
   onBellDown: (e: ReactPointerEvent) => void;
   onBellUp: (e: ReactPointerEvent) => void;
@@ -57,7 +59,18 @@ export function LaneHead({ name, color, top, isTurn, out }: LaneProps) {
 }
 
 /** 칸 아래쪽(조작): 알림 줄, 뒤집기, 종 */
-export function LaneBody({ downCount, canFlip, out, notice, gained, onFlip, onBellDown, onBellUp, onBellCancel }: LaneProps) {
+export function LaneBody({
+  downCount,
+  canFlip,
+  out,
+  notice,
+  gained,
+  timerMs,
+  onFlip,
+  onBellDown,
+  onBellUp,
+  onBellCancel,
+}: LaneProps) {
   return (
     <div className={styles.body}>
       <div className={notice === null ? styles.notice : NOTICE_CLASS[notice.tone]} data-testid="lane-notice">
@@ -73,6 +86,15 @@ export function LaneBody({ downCount, canFlip, out, notice, gained, onFlip, onBe
       >
         <span className={styles.flipLabel}>뒤집기</span>
         <span className={gained ? styles.countGained : styles.count}>{`${downCount}장`}</span>
+        {/* 차례가 올 때마다 새로 그려 처음부터 줄어든다 */}
+        {timerMs !== null && (
+          <span
+            key={timerMs}
+            className={styles.timer}
+            style={{ animationDuration: `${timerMs}ms` }}
+            data-testid="turn-timer"
+          />
+        )}
       </button>
       <button
         type="button"

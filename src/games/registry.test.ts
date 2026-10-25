@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { LEVEL_TEXT } from './bell/ui/levelText';
 import { blocksGame } from './blocks';
 import { findGame, GAMES, menuGames } from './registry';
 import type { GameModule, PuzzleGame } from './types';
@@ -43,6 +44,7 @@ describe('registry', () => {
     expect(game?.minPlayers).toBe(2);
     expect(game?.maxPlayers).toBe(4);
     expect(game?.Icon).toBeDefined();
+    expect(game?.kind === 'own' && game.levels).toEqual(LEVEL_TEXT);
     expect(menuGames(GAMES, '').map((g) => g.id)).not.toContain('bell');
     expect(menuGames(GAMES, '?dev').map((g) => g.id)).toContain('bell');
   });

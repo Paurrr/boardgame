@@ -7,23 +7,29 @@ import { PlayLayout } from '../../../shell/ui/PlayLayout';
 import { TopBar } from '../../../shell/ui/TopBar';
 import type { OwnMatchProps } from '../../types';
 import { bellReducer, createBellGame, isOut, ranking, topCards } from '../logic/game';
+import { turnLimitMs } from '../logic/level';
 import { decide, isWaiting, pressDown, pressUp } from '../logic/press';
 import type { Press } from '../logic/press';
 import styles from './BellMatch.module.css';
 import { BellResult } from './BellResult';
 import { LaneBody, LaneHead } from './Lane';
 import type { LaneProps } from './Lane';
+import { levelBadge } from './levelText';
 import { noticeFor } from './notice';
 
 /** 종 결과를 칸에 보여 주는 시간. 그동안 뒤집기·종을 막는다 */
 export const RING_SHOW_MS = 1500;
 /** 마지막 한 명이 남은 뒤 결과 화면으로 넘어가기까지 */
 export const END_SHOW_MS = 1500;
+/** 차례 시간이 다 됐는데 종 판정을 기다리는 손가락이 있으면 이만큼 뒤에 다시 본다 */
+const AUTO_FLIP_RETRY_MS = 50;
 
 type Point = { x: number; y: number };
 
-export function BellMatch({ playerNames, seed, onExit, onReplay }: OwnMatchProps) {
-  const [state, dispatch] = useReducer(bellReducer, undefined, () => createBellGame(playerNames.length, seed));
+export function BellMatch({ playerNames, seed, level, onExit, onReplay }: OwnMatchProps) {
+  const [state, dispatch] = useReducer(bellReducer, undefined, () =>
+    createBellGame(playerNames.length, seed, level),
+  );
   const [muted, setMutedState] = useState(isMuted);
   const [ended, setEnded] = useState(false);
   // 종 누름은 그릴 것이 아니라 판정 재료라 React 상태로 올리지 않는다
@@ -55,6 +61,24 @@ export function BellMatch({ playerNames, seed, onExit, onReplay }: OwnMatchProps
     const id = window.setTimeout(() => setEnded(true), END_SHOW_MS);
     return () => window.clearTimeout(id);
   }, [state.winner]);
+
+  // 차례 제한시간: 다 되면 차례인 사람 카드를 저절로 뒤집는다. 뒤집힐 때마다·결과 표시 뒤에 새로 잰다
+  const limit = turnLimitMs(level, state.flips);
+  const { turn, flips, lastRing, winner } = state;
+  useEffect(() => {
+    if (limit === null || lastRing !== null || winner !== null) return;
+    let id = 0;
+    const tick = () => {
+      // 종 판정을 기다리는 손가락이 있으면 카드를 바꾸지 않는다 (닿은 순간의 카드로 판정해야 공정하다)
+      if (book.current.some((p) => p.upAt === null)) {
+        id = window.setTimeout(tick, AUTO_FLIP_RETRY_MS);
+        return;
+      }
+      dispatch({ type: 'FLIP', player: turn });
+    };
+    id = window.setTimeout(tick, limit);
+    return () => window.clearTimeout(id);
+  }, [limit, turn, flips, lastRing, winner]);
 
   if (ended) {
     return <BellResult playerNames={playerNames} ranking={ranking(state)} onReplay={onReplay} onExit={onExit} />;
@@ -117,7 +141,7 @@ export function BellMatch({ playerNames, seed, onExit, onReplay }: OwnMatchProps
 
   return (
     <div className={styles.match}>
-      <TopBar muted={muted} onToggleMute={toggleMute} onExit={onExit} />
+      <TopBar label={levelBadge(level, state.flips)} muted={muted} onToggleMute={toggleMute} onExit={onExit} />
       <div className={styles.play}>
         <PlayLayout
           columns={playerNames.map((name, i) => {
@@ -128,6 +152,7 @@ export function BellMatch({ playerNames, seed, onExit, onReplay }: OwnMatchProps
               downCount: state.piles[i].down.length,
               isTurn: state.turn === i && state.winner === null,
               canFlip: state.turn === i && ring === null && state.winner === null,
+              timerMs: state.turn === i && ring === null && state.winner === null ? limit : null,
               out: isOut(state, i),
               notice: ring ? noticeFor(ring, i, playerNames) : null,
               gained: ring?.kind === 'correct' && ring.player === i,

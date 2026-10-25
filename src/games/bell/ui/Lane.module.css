@@ -113,6 +113,7 @@
 /* 뒤집기: 나무 블록 (그림자 대신 두꺼운 아래 테두리) */
 .flip,
 .flipOff {
+  position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -145,6 +146,30 @@
   background: var(--off);
   border-color: var(--off-edge);
   color: var(--ink-soft);
+}
+
+/* 차례 제한시간: 버튼 아래쪽 막대가 왼쪽으로 줄어든다 (UI_GUIDE 과일 종치기 예외, transform만) */
+.timer {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.45rem;
+  height: 0.4rem;
+  border-radius: 3px;
+  background: var(--on-accent);
+  transform-origin: left center;
+  animation-name: timer-run;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes timer-run {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 .flipLabel {
