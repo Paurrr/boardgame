@@ -47,7 +47,8 @@
       "name": "docs-rules",
       "status": "completed",
       "started_at": "2026-10-25T22:13:29+0900",
-      "summary": "문서만: ADR-010(판 하나 차례제·장수+보이는 시간·이름 색 차례·탭·store·뒤집기 횟수 recordBestTime·id pairs·hidden), ARCHITECTURE pairs 트리·Match에 level/store, PRD 8번, UI_GUIDE 짝 맞추기 절, 설계서 상태 '구현 완료, 칠판 확인 전(숨김)'"
+      "summary": "문서만: ADR-010(판 하나 차례제·장수+보이는 시간·이름 색 차례·탭·store·뒤집기 횟수 recordBestTime·id pairs·hidden), ARCHITECTURE pairs 트리·Match에 level/store, PRD 8번, UI_GUIDE 짝 맞추기 절, 설계서 상태 '구현 완료, 칠판 확인 전(숨김)'",
+      "completed_at": "2026-10-25T22:16:56+0900"
     }
   ],
   "created_at": "2026-10-25T21:46:35+0900"
