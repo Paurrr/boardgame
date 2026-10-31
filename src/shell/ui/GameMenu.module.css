@@ -1,10 +1,14 @@
-/* 제목은 위, 게임 카드는 아이 손이 닿는 아래쪽에 */
+/* 제목은 위, 게임 카드는 아이 손이 닿는 아래쪽에.
+   칠판(1280×720)에서 카드 4장이 한 줄에 들어간다. 게임이 더 늘어 넘치면 메뉴가 스크롤된다
+   (body는 스크롤을 막아 두었으므로 화면이 직접 스크롤 컨테이너가 된다) */
 .screen {
   display: flex;
   flex-direction: column;
   height: 100%;
   box-sizing: border-box;
   padding: 2rem 2rem 1.5rem 2rem;
+  overflow-y: auto;
+  touch-action: pan-y;
 }
 
 .deco {
@@ -26,19 +30,21 @@
   margin: 0 0 auto 0;
 }
 
+/* 카드 사이는 gap으로: 여백으로 두면 마지막 카드의 오른쪽 여백까지 줄 바꿈 계산에 들어가 4번째 카드가 밀려난다 */
 .list {
   display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-/* 큰 나무 블록 카드. 눌림은 .btn과 같은 방식 (바닥 제자리, 면만 내려감) */
+/* 큰 나무 블록 카드: 위에 그림, 아래에 글. 4장 × 14rem + 사이 3rem = 59rem (칠판 폭에서 여백 빼고 59.8rem)
+   눌림은 .btn과 같은 방식 (바닥 제자리, 면만 내려감) */
 .card {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   box-sizing: border-box;
-  width: 31rem;
-  min-height: 9rem;
-  margin: 0 1rem 1rem 0;
+  width: 14rem;
   padding: 1.2rem 1.4rem;
   border: 4px solid var(--ink);
   border-bottom-width: 0.5rem;
@@ -49,7 +55,6 @@
 
 .card:active {
   margin-top: 0.3rem;
-  min-height: 8.7rem;
   border-bottom-width: 0.2rem;
 }
 
@@ -62,9 +67,10 @@
 
 .cardArt {
   flex: 0 0 auto;
+  align-self: center;
   width: 8.4rem;
   height: 5.4rem;
-  margin-left: 1.2rem;
+  margin-bottom: 0.8rem;
 }
 
 .cardName {
@@ -75,6 +81,7 @@
 .cardDesc {
   margin-top: 0.4rem;
   color: var(--ink-soft);
+  word-break: keep-all;
 }
 
 .cardMeta {

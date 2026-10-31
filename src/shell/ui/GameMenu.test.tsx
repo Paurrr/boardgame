@@ -46,6 +46,14 @@ describe('GameMenu', () => {
     expect(within(card).getByTestId('game-art').querySelector('svg')).not.toBeNull();
   });
 
+  it('카드 그림은 게임 이름보다 앞(위)에 그린다', () => {
+    render(<GameMenu onSelect={vi.fn()} />);
+    const card = screen.getByRole('button', { name: /블록 퍼즐/ });
+    const art = within(card).getByTestId('game-art');
+    const name = within(card).getByText('블록 퍼즐');
+    expect(art.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('주소에 ?dev가 없으면 숨긴 게임 카드를 그리지 않는다', () => {
     render(<GameMenu onSelect={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /숨긴 게임/ })).toBeNull();

@@ -19,16 +19,16 @@ export function GameMenu({ onSelect }: Props) {
           const { Icon } = g;
           return (
             <button key={g.id} type="button" className={styles.card} onClick={() => onSelect(g)}>
-              <span className={styles.cardText}>
-                <span className={styles.cardName}>{g.name}</span>
-                <span className={styles.cardDesc}>{g.description}</span>
-                <span className={styles.cardMeta}>{`${g.minPlayers}~${g.maxPlayers}명`}</span>
-              </span>
               {Icon && (
                 <span className={styles.cardArt} data-testid="game-art">
                   <Icon />
                 </span>
               )}
+              <span className={styles.cardText}>
+                <span className={styles.cardName}>{g.name}</span>
+                <span className={styles.cardDesc}>{g.description}</span>
+                <span className={styles.cardMeta}>{`${g.minPlayers}~${g.maxPlayers}명`}</span>
+              </span>
             </button>
           );
         })}
